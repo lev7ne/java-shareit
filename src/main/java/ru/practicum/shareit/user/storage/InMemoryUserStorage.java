@@ -3,7 +3,6 @@ package ru.practicum.shareit.user.storage;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.util.Counter;
-import ru.practicum.shareit.util.exception.EmptyEmailException;
 import ru.practicum.shareit.util.exception.DuplicateEmailException;
 import ru.practicum.shareit.util.exception.NotFoundException;
 
@@ -19,9 +18,6 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User add(User user) {
-//        if (user.getEmail() == null || user.getEmail().isEmpty()) {
-//            throw new EmptyEmailException("Поле email пустое.");
-//        }
         validateEmail(user.getEmail());
         user.setId(counter.createId());
         userMap.put(user.getId(), user);
@@ -76,6 +72,5 @@ public class InMemoryUserStorage implements UserStorage {
         if (!emails.isEmpty()) {
             throw new DuplicateEmailException("Email: " + email + " - уже существует!");
         }
-
     }
 }

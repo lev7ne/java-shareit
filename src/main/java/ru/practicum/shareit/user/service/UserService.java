@@ -6,7 +6,7 @@ import java.util.Collection;
 
 public interface UserService {
     UserDto add(UserDto userDto);
-    UserDto update(UserDto userDto, long id);
+    UserDto update(long id, UserDto userDto);
     UserDto getById(long id);
     void delete(long id);
     Collection<UserDto> getAll();

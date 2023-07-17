@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.practicum.shareit.util.exception.EmptyEmailException;
+import ru.practicum.shareit.util.exception.NoAccessException;
 import ru.practicum.shareit.util.exception.NotFoundException;
 
 
@@ -22,7 +22,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, Integer> handleValidationException(final EmptyEmailException e) {
+    public Map<String, Integer> handleValidationException(final NoAccessException e) {
         return Map.of("BAD_REQUEST", HttpStatus.BAD_REQUEST.value());
     }
 }
