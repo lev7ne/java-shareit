@@ -19,9 +19,9 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User add(User user) {
-        if (user.getEmail() == null || user.getEmail().isEmpty()) {
-            throw new EmptyEmailException("Поле email пустое.");
-        }
+//        if (user.getEmail() == null || user.getEmail().isEmpty()) {
+//            throw new EmptyEmailException("Поле email пустое.");
+//        }
         validateEmail(user.getEmail());
         user.setId(counter.createId());
         userMap.put(user.getId(), user);
@@ -35,25 +35,31 @@ public class InMemoryUserStorage implements UserStorage {
         }
         User anyUser = getById(id);
 
-        if (user.getName() != null && !user.getName().isBlank()) {
-            anyUser.setName(user.getName());
-        }
-        if (user.getEmail() != null && !user.getEmail().isBlank()) {
-            if (!user.getEmail().equals(anyUser.getEmail())) {
-                validateEmail(user.getEmail());
-            }
+        if (user.getEmail() != null && !user.getEmail().equals(anyUser.getEmail())) {
+            validateEmail(user.getEmail());
             anyUser.setEmail(user.getEmail());
         }
+
+        if (user.getName() != null) {
+            anyUser.setName(user.getName());
+        }
+
         return userMap.put(anyUser.getId(), anyUser);
     }
 
     @Override
     public User getById(long id) {
+        if (!userMap.containsKey(id)) {
+            throw new NotFoundException("Попытка получить пользователя с несуществующим id: " + id);
+        }
         return userMap.get(id);
     }
 
     @Override
     public void delete(long id) {
+        if (!userMap.containsKey(id)) {
+            throw new NotFoundException("Попытка получить пользователя с несуществующим id: " + id);
+        }
         userMap.remove(id);
     }
 

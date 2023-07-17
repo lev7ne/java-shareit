@@ -10,9 +10,6 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 public class User {
     long id;
-    @NotBlank(message = "Имя не может быть пустым!")
     String name;
-    @NotBlank(message = "Email не может быть пустым!")
-    @Email(message = "Некорректный email!")
     String email;
 }
