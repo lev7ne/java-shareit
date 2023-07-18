@@ -26,21 +26,21 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User update(User user, long id) {
-        if (!userMap.containsKey(id)) {
+        User updatedUser = userMap.get(id);
+        if (updatedUser == null) {
             throw new NotFoundException("Попытка обновить пользователя с несуществующим id: " + id);
         }
-        User anyUser = getById(id);
 
-        if (user.getEmail() != null && !user.getEmail().equals(anyUser.getEmail())) {
+        if (user.getEmail() != null && !user.getEmail().equals(updatedUser.getEmail())) {
             validateEmail(user.getEmail());
-            anyUser.setEmail(user.getEmail());
+            updatedUser.setEmail(user.getEmail());
         }
 
         if (user.getName() != null) {
-            anyUser.setName(user.getName());
+            updatedUser.setName(user.getName());
         }
 
-        return userMap.put(anyUser.getId(), anyUser);
+        return userMap.put(updatedUser.getId(), updatedUser);
     }
 
     @Override

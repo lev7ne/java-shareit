@@ -6,6 +6,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
+import java.util.Collection;
 
 @RestController
 @RequestMapping("/items")
@@ -23,13 +24,18 @@ public class ItemController {
     }
 
     @PatchMapping("/{id}")
-    public ItemDto updateItem(@RequestHeader("X-Sharer-User-Id") long itemId,
-                              @Valid @RequestBody ItemDto itemDto, @PathVariable long id) {
-        return itemService.update(itemId, itemDto, id);
+    public ItemDto updateItem(@RequestHeader("X-Sharer-User-Id") long ownerId,
+                              @RequestBody ItemDto itemDto, @PathVariable("id") long itemId) {
+        return itemService.update(ownerId, itemDto, itemId);
     }
 
     @GetMapping("/{id}")
     public ItemDto getItem(@PathVariable long id) {
         return itemService.getById(id);
+    }
+
+    @GetMapping
+    public Collection<ItemDto> getAll(@RequestHeader("X-Sharer-User-Id") long ownerId){
+        return itemService.getAll(ownerId);
     }
 }

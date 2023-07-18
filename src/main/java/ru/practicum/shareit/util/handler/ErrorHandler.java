@@ -21,8 +21,8 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
     public Map<String, Integer> handleValidationException(final NoAccessException e) {
-        return Map.of("BAD_REQUEST", HttpStatus.BAD_REQUEST.value());
+        return Map.of("FORBIDDEN", HttpStatus.FORBIDDEN.value());
     }
 }
