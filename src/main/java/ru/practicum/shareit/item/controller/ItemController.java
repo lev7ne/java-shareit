@@ -29,6 +29,11 @@ public class ItemController {
         return itemService.update(ownerId, itemDto, itemId);
     }
 
+    @GetMapping("/search")
+    public Collection<ItemDto> search(@RequestParam("text") String text) {
+        return itemService.search(text);
+    }
+
     @GetMapping("/{id}")
     public ItemDto getItem(@PathVariable long id) {
         return itemService.getById(id);

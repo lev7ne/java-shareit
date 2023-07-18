@@ -2,10 +2,6 @@ package ru.practicum.shareit.item.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemDtoMapper;
 import ru.practicum.shareit.item.model.Item;
@@ -16,7 +12,7 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 @Service
-public class ItemServiceImpl implements ItemService{
+public class ItemServiceImpl implements ItemService {
     ItemStorage itemStorage;
     UserStorage userStorage;
 
@@ -50,6 +46,13 @@ public class ItemServiceImpl implements ItemService{
     @Override
     public Collection<ItemDto> getAll(long ownerId) {
         return itemStorage.getAll(ownerId).stream()
+                .map(ItemDtoMapper::mapToItemDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Collection<ItemDto> search(String text) {
+        return itemStorage.search(text).stream()
                 .map(ItemDtoMapper::mapToItemDto)
                 .collect(Collectors.toList());
     }

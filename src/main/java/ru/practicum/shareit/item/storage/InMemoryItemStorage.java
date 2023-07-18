@@ -7,6 +7,7 @@ import ru.practicum.shareit.util.Counter;
 import ru.practicum.shareit.util.exception.NoAccessException;
 import ru.practicum.shareit.util.exception.NotFoundException;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -65,5 +66,16 @@ public class InMemoryItemStorage implements ItemStorage {
             throw new NotFoundException("Попытка получить предмет с несуществующим id: " + id);
         }
         return itemMap.get(id);
+    }
+
+    @Override
+    public Collection<Item> search(String text) {
+        if (text.isBlank()) {
+            return new ArrayList<>();
+        }
+        return itemMap.values().stream()
+                .filter(Item::getAvailable)
+                .filter(item -> item.getName().toLowerCase().contains(text.toLowerCase()) || item.getDescription().toLowerCase().contains(text.toLowerCase()))
+                .collect(Collectors.toList());
     }
 }

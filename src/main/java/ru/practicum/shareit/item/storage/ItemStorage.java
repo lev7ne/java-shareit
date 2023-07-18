@@ -9,4 +9,5 @@ public interface ItemStorage {
     Item update(Item item, long itemId);
     Item getById(long id);
     Collection<Item> getAll(long ownerId);
+    Collection<Item> search(String text);
 }
