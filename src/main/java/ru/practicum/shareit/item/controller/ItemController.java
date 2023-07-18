@@ -17,6 +17,7 @@ public class ItemController {
     public ItemController(ItemService itemService) {
         this.itemService = itemService;
     }
+
     @PostMapping
     public ItemDto createItem(@RequestHeader("X-Sharer-User-Id") long ownerId,
                               @Valid @RequestBody ItemDto itemDto) {
@@ -40,7 +41,7 @@ public class ItemController {
     }
 
     @GetMapping
-    public Collection<ItemDto> getAll(@RequestHeader("X-Sharer-User-Id") long ownerId){
+    public Collection<ItemDto> getAll(@RequestHeader("X-Sharer-User-Id") long ownerId) {
         return itemService.getAll(ownerId);
     }
 }
