@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 @Service
 public class UserServiceImpl implements UserService {
 
-    UserStorage userStorage;
+    private final UserStorage userStorage;
 
     @Autowired
     public UserServiceImpl(UserStorage userStorage) {

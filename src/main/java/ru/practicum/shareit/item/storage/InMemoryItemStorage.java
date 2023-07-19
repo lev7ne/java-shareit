@@ -7,7 +7,6 @@ import ru.practicum.shareit.util.Counter;
 import ru.practicum.shareit.util.exception.NoAccessException;
 import ru.practicum.shareit.util.exception.NotFoundException;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,14 +28,9 @@ public class InMemoryItemStorage implements ItemStorage {
 
     @Override
     public Item update(Item item, long itemId) {
-        Item updatedItem = itemMap.get(itemId);
-        if (updatedItem == null) {
-            log.error("Предмет с id: {} не существует", itemId);
-            throw new NotFoundException("Попытка получить предмет с несуществующим id: " + itemId);
-        }
+        Item updatedItem = getById(itemId);
 
         if (item.getOwner().getId() != updatedItem.getOwner().getId()) {
-            log.error("Только владельцу вещи разрешено редактирование.");
             throw new NoAccessException("Только владельцу вещи разрешено редактирование.");
         }
 
@@ -62,20 +56,20 @@ public class InMemoryItemStorage implements ItemStorage {
 
     @Override
     public Item getById(long id) {
-        if (!itemMap.containsKey(id)) {
-            throw new NotFoundException("Попытка получить предмет с несуществующим id: " + id);
+        Item item = itemMap.get(id);
+        if (item == null) {
+            throw new NotFoundException("Предмет с id: " + id + " не найден или ещё не создан.");
         }
-        return itemMap.get(id);
+        return item;
     }
 
     @Override
     public Collection<Item> search(String text) {
-        if (text.isBlank()) {
-            return new ArrayList<>();
-        }
+        String searchText = text.toLowerCase();
+
         return itemMap.values().stream()
                 .filter(Item::getAvailable)
-                .filter(item -> item.getName().toLowerCase().contains(text.toLowerCase()) || item.getDescription().toLowerCase().contains(text.toLowerCase()))
+                .filter(item -> item.getName().toLowerCase().contains(searchText) || item.getDescription().toLowerCase().contains(searchText))
                 .collect(Collectors.toList());
     }
 }

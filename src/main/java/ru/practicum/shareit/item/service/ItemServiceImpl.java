@@ -8,13 +8,14 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.ItemStorage;
 import ru.practicum.shareit.user.storage.UserStorage;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
 @Service
 public class ItemServiceImpl implements ItemService {
-    ItemStorage itemStorage;
-    UserStorage userStorage;
+    private final ItemStorage itemStorage;
+    private final UserStorage userStorage;
 
     @Autowired
     public ItemServiceImpl(ItemStorage itemStorage, UserStorage userStorage) {
@@ -52,6 +53,9 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Collection<ItemDto> search(String text) {
+        if (text == null || text.isBlank()) {
+            return new ArrayList<>();
+        }
         return itemStorage.search(text).stream()
                 .map(ItemDtoMapper::mapToItemDto)
                 .collect(Collectors.toList());

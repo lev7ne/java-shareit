@@ -26,10 +26,7 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User update(User user, long id) {
-        User updatedUser = userMap.get(id);
-        if (updatedUser == null) {
-            throw new NotFoundException("Попытка обновить пользователя с несуществующим id: " + id);
-        }
+        User updatedUser = getById(id);
 
         if (user.getEmail() != null && !user.getEmail().equals(updatedUser.getEmail())) {
             validateEmail(user.getEmail());
@@ -45,17 +42,16 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User getById(long id) {
-        if (!userMap.containsKey(id)) {
-            throw new NotFoundException("Попытка получить пользователя с несуществующим id: " + id);
+        User user = userMap.get(id);
+        if (user == null) {
+            throw new NotFoundException("Пользователь с id: " + id + " не найден или ещё не создан.");
         }
-        return userMap.get(id);
+        return user;
     }
 
     @Override
     public void delete(long id) {
-        if (!userMap.containsKey(id)) {
-            throw new NotFoundException("Попытка получить пользователя с несуществующим id: " + id);
-        }
+        getById(id);
         userMap.remove(id);
     }
 
@@ -65,12 +61,9 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     private void validateEmail(String email) {
-        Collection<String> emails = getAll().stream()
-                .map(User::getEmail)
-                .filter(userEmail -> userEmail.equals(email))
-                .collect(Collectors.toList());
+        Collection<String> emails = getAll().stream().map(User::getEmail).filter(userEmail -> userEmail.equals(email)).collect(Collectors.toList());
         if (!emails.isEmpty()) {
-            throw new DuplicateEmailException("Email: " + email + " - уже существует!");
+            throw new DuplicateEmailException("Email: " + email + " уже используется другим пользователем.");
         }
     }
 }
