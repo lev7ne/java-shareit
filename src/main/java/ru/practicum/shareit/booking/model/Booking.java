@@ -6,16 +6,16 @@ import lombok.NoArgsConstructor;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
-import java.time.LocalDate;
+import java.time.Instant;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class Booking {
     long id;
-    LocalDate start;
-    LocalDate end;
+    Instant start;
+    Instant end;
     Item item;
     User booker;
-    BookingStatus bookingStatus;
+    Status status;
 }
