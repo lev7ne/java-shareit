@@ -33,7 +33,6 @@ public class UserServiceImpl implements UserService {
         if (optionalUser.isEmpty()) {
             throw new NotFoundException("Пользователь с id: " + id + " не найден или ещё не создан.");
         }
-
         return UserDtoMapper.toUserDto(optionalUser.get());
     }
 
