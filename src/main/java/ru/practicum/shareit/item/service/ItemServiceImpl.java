@@ -2,7 +2,10 @@ package ru.practicum.shareit.item.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDtoBooking;
 import ru.practicum.shareit.item.mapper.ItemDtoMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
@@ -22,10 +25,13 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
 
+    private final BookingRepository bookingRepository;
+
     @Autowired
-    public ItemServiceImpl(ItemRepository itemRepository, UserRepository userRepository) {
+    public ItemServiceImpl(ItemRepository itemRepository, UserRepository userRepository, BookingRepository bookingRepository) {
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
+        this.bookingRepository = bookingRepository;
     }
 
     @Override
@@ -67,17 +73,17 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto getById(long itemId) {
+    public ItemDtoBooking getById(long itemId) {
         Optional<Item> optionalItem = itemRepository.findById(itemId);
         if (optionalItem.isEmpty()) {
             throw new NotFoundException("Предмет с id: " + itemId + " не найден или ещё не создан.");
         }
-        return ItemDtoMapper.mapToItemDto(optionalItem.get());
+        Booking booking = bookingRepository.findByItemId(itemId);
+        return ItemDtoMapper.mapToItemDtoBooking(optionalItem.get(), booking);
     }
 
     @Override
     public Collection<ItemDto> getAll(long ownerId) {
-
         return itemRepository.findAll().stream()
                 .filter(item -> item.getOwner().getId() == ownerId)
                 .map(ItemDtoMapper::mapToItemDto)
@@ -89,7 +95,6 @@ public class ItemServiceImpl implements ItemService {
         if (text == null || text.isBlank()) {
             return new ArrayList<>();
         }
-
         return itemRepository.search(text).stream()
                 .map(ItemDtoMapper::mapToItemDto)
                 .collect(Collectors.toList());

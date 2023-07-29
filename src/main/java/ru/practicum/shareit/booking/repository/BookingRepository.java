@@ -6,4 +6,6 @@ import ru.practicum.shareit.booking.model.Booking;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
+    Booking findByItemId(long itemId);
+
 }
