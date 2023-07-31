@@ -3,10 +3,11 @@ package ru.practicum.shareit.booking.controller;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoResponse;
+import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.service.BookingService;
-import ru.practicum.shareit.item.dto.ItemDto;
 
 import javax.validation.Valid;
+import java.util.Collection;
 
 @RestController
 @RequestMapping(path = "/bookings")
@@ -21,5 +22,31 @@ public class BookingController {
     public BookingDtoResponse createBooking(@RequestHeader("X-Sharer-User-Id") long bookerId,
                                             @Valid @RequestBody BookingDto bookingDto) {
         return bookingService.add(bookerId, bookingDto);
+    }
+
+    @PatchMapping("/{id}")
+    public BookingDtoResponse updateApproval(@RequestHeader("X-Sharer-User-Id") long ownerId,
+                                           @PathVariable long id,
+                                           @RequestParam("approved") boolean approved) {
+        return bookingService.update(ownerId, id, approved);
+    }
+
+    @GetMapping("/{bookingId}")
+    public BookingDtoResponse readAnyBooking(@RequestHeader("X-Sharer-User-Id") long userId,
+                                             @PathVariable long bookingId) {
+        return bookingService.findAny(userId, bookingId);
+    }
+
+    @GetMapping
+    public Collection<BookingDtoResponse> readAllBookerBookings(@RequestHeader("X-Sharer-User-Id") long userId,
+                                                                @RequestParam(defaultValue = "ALL") BookingState state) {
+
+        return bookingService.readAllBookingsBooker(userId, state);
+    }
+
+    @GetMapping("/bookings/owner")
+    public Collection<BookingDtoResponse> readAllBookingItem(@RequestHeader("X-Sharer-User-Id") long userId,
+                                                             @RequestParam(defaultValue = "ALL") BookingState state) {
+        return null;
     }
 }

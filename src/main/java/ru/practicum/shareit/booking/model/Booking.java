@@ -1,6 +1,5 @@
 package ru.practicum.shareit.booking.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,7 +7,7 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 
 @Entity
@@ -22,9 +21,9 @@ public class Booking {
     @Column(name = "id")
     private long id;
     @Column(name = "start_date")
-    private LocalDate start;
+    private LocalDateTime start;
     @Column(name = "end_date")
-    private LocalDate end;
+    private LocalDateTime end;
     @ManyToOne
     @JoinColumn(name = "item_id", referencedColumnName = "id")
     private Item item;
@@ -33,6 +32,6 @@ public class Booking {
     private User booker;
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private Status status;
+    private BookingStatus bookingStatus;
 
 }
