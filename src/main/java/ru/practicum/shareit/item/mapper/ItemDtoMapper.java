@@ -1,8 +1,11 @@
 package ru.practicum.shareit.item.mapper;
 
+import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.mapper.BookingDtoMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoBooking;
+import ru.practicum.shareit.item.dto.ItemDtoBookingExtended;
 import ru.practicum.shareit.item.model.Item;
 
 import java.time.Instant;
@@ -37,12 +40,14 @@ public class ItemDtoMapper {
         );
     }
 
-    public static ItemDto mapToItemDtoWithoutDescAndAvailable(Item item) {
-        return new ItemDto(
+    public static ItemDtoBookingExtended mapToItemDtoBookingExtended(Item item, Booking lastBooking, Booking nextBooking) {
+        return new ItemDtoBookingExtended(
                 item.getId(),
                 item.getName(),
-                null,
-                null
+                item.getDescription(),
+                item.getAvailable(),
+                BookingDtoMapper.toBookingDto(lastBooking),
+                BookingDtoMapper.toBookingDto(nextBooking)
         );
     }
 }

@@ -6,6 +6,7 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoBooking;
+import ru.practicum.shareit.item.dto.ItemDtoBookingExtended;
 import ru.practicum.shareit.item.mapper.ItemDtoMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
@@ -98,5 +99,14 @@ public class ItemServiceImpl implements ItemService {
         return itemRepository.search(text).stream()
                 .map(ItemDtoMapper::mapToItemDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public ItemDtoBookingExtended getItemByIdWithUser(long ownerId, long itemId) {
+        Item item = itemRepository.findItemByOwner_IdAndId(ownerId, itemId);
+
+
+
+        return null;
     }
 }

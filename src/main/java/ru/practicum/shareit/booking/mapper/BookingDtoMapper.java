@@ -11,7 +11,7 @@ import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
 public class BookingDtoMapper {
-    public static Booking toBookingDto(BookingDto bookingDto, Item item, User user, BookingStatus status) {
+    public static Booking toBooking(BookingDto bookingDto, Item item, User user, BookingStatus status) {
         return new Booking(
                 bookingDto.getId(),
                 bookingDto.getStart(),
@@ -19,6 +19,16 @@ public class BookingDtoMapper {
                 item,
                 user,
                 status
+        );
+    }
+
+    public static BookingDto toBookingDto(Booking booking) {
+        return new BookingDto(
+                booking.getId(),
+                booking.getStart(),
+                booking.getEnd(),
+                booking.getItem().getId(),
+                booking.getBooker().getId()
         );
     }
 

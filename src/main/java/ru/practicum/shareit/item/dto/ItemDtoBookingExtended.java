@@ -2,18 +2,15 @@ package ru.practicum.shareit.item.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-
-import java.time.Instant;
+import ru.practicum.shareit.booking.dto.BookingDto;
 
 @Data
 @AllArgsConstructor
-public class ItemDtoBooking {
+public class ItemDtoBookingExtended {
     private long id;
     private String name;
     private String description;
     private Boolean available;
-    private Instant start;
-    private Instant end;
-
+    private BookingDto lastBooking;
+    private BookingDto nextBooking;
 }
-

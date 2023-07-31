@@ -58,7 +58,7 @@ public class BookingServiceImpl implements BookingService {
         }
 
         PeriodValidator.StartAndEndTimeValidation(bookingDto);
-        Booking booking = BookingDtoMapper.toBookingDto(bookingDto, optionalItem.get(), optionalUser.get(), BookingStatus.WAITING);
+        Booking booking = BookingDtoMapper.toBooking(bookingDto, optionalItem.get(), optionalUser.get(), BookingStatus.WAITING);
 
         return BookingDtoMapper.toBookingDtoResponse(bookingRepository.save(booking));
     }
@@ -152,7 +152,7 @@ public class BookingServiceImpl implements BookingService {
                         .collect(Collectors.toList());
             case WAITING:
             case REJECTED:
-                return bookingRepository.findAllBookingsByBookingStatus(bookerId, state.toString())
+                return bookingRepository.findAllBookingsByBookingStatusForBooker(bookerId, state.toString())
                         .stream()
                         .map(BookingDtoMapper::toBookingDtoResponse)
                         .collect(Collectors.toList());
@@ -171,11 +171,32 @@ public class BookingServiceImpl implements BookingService {
         if (owner.isEmpty()) {
             throw new NotFoundException("Пользователь с id: " + ownerId + " не найден или ещё не создан.");
         }
-        
-        
-        return null;
+
+        switch (state) {
+            case CURRENT:
+                return bookingRepository.findAllBookingsOwnerCurrent(ownerId, LocalDateTime.now())
+                        .stream()
+                        .map(BookingDtoMapper::toBookingDtoResponse)
+                        .collect(Collectors.toList());
+            case PAST:
+                return bookingRepository.findAllBookingsOwnerPast(ownerId, LocalDateTime.now())
+                        .stream()
+                        .map(BookingDtoMapper::toBookingDtoResponse)
+                        .collect(Collectors.toList());
+            case FUTURE:
+                return bookingRepository.findAllBookingsOwnerFuture(ownerId, LocalDateTime.now())
+                        .stream()
+                        .map(BookingDtoMapper::toBookingDtoResponse)
+                        .collect(Collectors.toList());
+            case WAITING:
+            case REJECTED:
+                return bookingRepository.findAllBookingsByBookingStatusForOwner(ownerId, state.toString())
+                        .stream()
+                        .map(BookingDtoMapper::toBookingDtoResponse)
+                        .collect(Collectors.toList());
+            case ALL:
+            default:
+                throw new UnavailableStateException("Недопустимый параметр state.");
+        }
     }
-    
-
-
 }
