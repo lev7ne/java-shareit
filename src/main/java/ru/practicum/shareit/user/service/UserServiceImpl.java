@@ -2,6 +2,7 @@ package ru.practicum.shareit.user.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserDtoMapper;
 import ru.practicum.shareit.user.model.User;
@@ -28,7 +29,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto findById(long id) {
+    public UserDto find(long id) {
         Optional<User> optionalUser = userRepository.findById(id);
         if (optionalUser.isEmpty()) {
             throw new NotFoundException("Пользователь с id: " + id + " не найден или ещё не создан.");
@@ -50,7 +51,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto update(long id, UserDto userDto) {
-        UserDto updatedUserDto = findById(id);
+        UserDto updatedUserDto = find(id);
 
         if (userDto.getName() != null) {
             updatedUserDto.setName(userDto.getName());

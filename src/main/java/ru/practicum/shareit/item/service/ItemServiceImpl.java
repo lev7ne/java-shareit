@@ -2,10 +2,11 @@ package ru.practicum.shareit.item.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.mapper.BookingDtoMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemDtoBooking;
+import ru.practicum.shareit.item.dto.ItemDtoRequest;
+import ru.practicum.shareit.item.dto.ItemDtoResponse;
 import ru.practicum.shareit.item.mapper.ItemDtoMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
@@ -24,7 +25,6 @@ public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
-
     private final BookingRepository bookingRepository;
 
     @Autowired
@@ -35,19 +35,20 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto add(long ownerId, ItemDto itemDto) {
+    public ItemDtoResponse add(long ownerId, ItemDtoRequest itemDto) {
         Optional<User> optionalUser = userRepository.findById(ownerId);
         if (optionalUser.isEmpty()) {
             throw new NotFoundException("Пользователь с id: " + ownerId + " не найден или ещё не создан.");
         }
+
         Item item = ItemDtoMapper.mapToItem(itemDto);
         item.setOwner(optionalUser.get());
 
-        return ItemDtoMapper.mapToItemDto(itemRepository.save(item));
+        return ItemDtoMapper.mapToItemDtoResponse(itemRepository.save(item));
     }
 
     @Override
-    public ItemDto update(long ownerId, ItemDto itemDto, long itemId) {
+    public ItemDtoResponse update(long ownerId, ItemDtoRequest itemDto, long itemId) {
         Optional<Item> optionalItem = itemRepository.findById(itemId);
         if (optionalItem.isEmpty()) {
             throw new NotFoundException("Предмет с id: " + itemId + " не найден или ещё не создан.");
@@ -69,11 +70,11 @@ public class ItemServiceImpl implements ItemService {
             updatedItem.setAvailable(itemDto.getAvailable());
         }
 
-        return ItemDtoMapper.mapToItemDto(itemRepository.save(updatedItem));
+        return ItemDtoMapper.mapToItemDtoResponse(itemRepository.save(updatedItem));
     }
 
     @Override
-    public ItemDtoBooking getById(long itemId, long userId) {
+    public ItemDtoResponse getAny(long itemId, long userId) {
         Optional<Item> optionalItem = itemRepository.findById(itemId);
         if (optionalItem.isEmpty()) {
             throw new NotFoundException("Предмет с id: " + itemId + " не найден или ещё не создан.");
@@ -83,32 +84,36 @@ public class ItemServiceImpl implements ItemService {
         if (item.getOwner().getId() == userId) {
             Booking lastBooking = bookingRepository.findAnyBookingLast(itemId, userId);
             Booking nextBooking = bookingRepository.findAnyBookingNext(itemId, userId);
-            return ItemDtoMapper.mapToItemDtoBooking(item, lastBooking, nextBooking);
+
+            return ItemDtoMapper.mapToItemDtoResponseExtended(item,
+                    lastBooking != null ? BookingDtoMapper.toBookingDtoShortResponse(lastBooking) : null,
+                    nextBooking != null ? BookingDtoMapper.toBookingDtoShortResponse(nextBooking) : null
+            );
         }
 
-        return ItemDtoMapper.mapToItemDtoBooking(item, null, null);
+        return ItemDtoMapper.mapToItemDtoResponse(item);
     }
 
     @Override
-    public Collection<ItemDto> getAll(long ownerId) {
+    public Collection<ItemDtoResponse> getAll(long ownerId) {
         return itemRepository.findAll().stream()
                 .filter(item -> item.getOwner().getId() == ownerId)
-                .map(ItemDtoMapper::mapToItemDto)
+                .map(ItemDtoMapper::mapToItemDtoResponse)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public Collection<ItemDto> search(String text) {
+    public Collection<ItemDtoResponse> search(String text) {
         if (text == null || text.isBlank()) {
             return new ArrayList<>();
         }
         return itemRepository.search(text).stream()
-                .map(ItemDtoMapper::mapToItemDto)
+                .map(ItemDtoMapper::mapToItemDtoResponse)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public ItemDtoBooking getItemByIdWithUser(long ownerId, long itemId) {
+    public ItemDtoResponse getItemByIdWithUser(long ownerId, long itemId) {
 
 
 

@@ -2,15 +2,15 @@ package ru.practicum.shareit.item.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.BookingDtoResponseShort;
 
 @Data
 @AllArgsConstructor
-public class ItemDtoBooking {
+public class ItemDtoResponse {
     private long id;
     private String name;
     private String description;
     private Boolean available;
-    private BookingDto lastBooking;
-    private BookingDto nextBooking;
+    private BookingDtoResponseShort lastBooking;
+    private BookingDtoResponseShort nextBooking;
 }

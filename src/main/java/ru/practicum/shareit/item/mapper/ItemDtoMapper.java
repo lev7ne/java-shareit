@@ -1,38 +1,41 @@
 package ru.practicum.shareit.item.mapper;
 
-import ru.practicum.shareit.booking.mapper.BookingDtoMapper;
+import ru.practicum.shareit.booking.dto.BookingDtoResponseShort;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemDtoBooking;
+import ru.practicum.shareit.item.dto.ItemDtoRequest;
+import ru.practicum.shareit.item.dto.ItemDtoResponse;
 import ru.practicum.shareit.item.model.Item;
 
 public class ItemDtoMapper {
-    public static Item mapToItem(ItemDto itemDto) {
+    public static Item mapToItem(ItemDtoRequest itemDtoRequest) {
         return new Item(
-                itemDto.getId(),
-                itemDto.getName(),
-                itemDto.getDescription(),
-                itemDto.getAvailable()
+                itemDtoRequest.getId(),
+                itemDtoRequest.getName(),
+                itemDtoRequest.getDescription(),
+                itemDtoRequest.getAvailable()
         );
     }
 
-    public static ItemDto mapToItemDto(Item item) {
-        return new ItemDto(
-                item.getId(),
-                item.getName(),
-                item.getDescription(),
-                item.getAvailable()
-        );
-    }
-
-    public static ItemDtoBooking mapToItemDtoBooking(Item item, Booking lastBooking, Booking nextBooking) {
-        return new ItemDtoBooking(
+    public static ItemDtoResponse mapToItemDtoResponse(Item item) {
+        return new ItemDtoResponse(
                 item.getId(),
                 item.getName(),
                 item.getDescription(),
                 item.getAvailable(),
-                lastBooking != null ? BookingDtoMapper.toBookingDto(lastBooking) : null,
-                nextBooking != null ? BookingDtoMapper.toBookingDto(nextBooking) : null
+                null,
+                null
         );
     }
+
+    public static ItemDtoResponse mapToItemDtoResponseExtended(Item item, BookingDtoResponseShort lastBooking, BookingDtoResponseShort nextBooking) {
+        return new ItemDtoResponse(
+                item.getId(),
+                item.getName(),
+                item.getDescription(),
+                item.getAvailable(),
+                lastBooking,
+                nextBooking
+        );
+    }
+
 }

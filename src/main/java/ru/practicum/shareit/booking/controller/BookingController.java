@@ -1,7 +1,7 @@
 package ru.practicum.shareit.booking.controller;
 
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.BookingDtoRequest;
 import ru.practicum.shareit.booking.dto.BookingDtoResponse;
 import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.service.BookingService;
@@ -20,8 +20,8 @@ public class BookingController {
 
     @PostMapping
     public BookingDtoResponse createBooking(@RequestHeader("X-Sharer-User-Id") long bookerId,
-                                            @Valid @RequestBody BookingDto bookingDto) {
-        return bookingService.add(bookerId, bookingDto);
+                                            @Valid @RequestBody BookingDtoRequest bookingDtoRequest) {
+        return bookingService.add(bookerId, bookingDtoRequest);
     }
 
     @PatchMapping("/{id}")
@@ -46,7 +46,8 @@ public class BookingController {
 
     @GetMapping("/bookings/owner")
     public Collection<BookingDtoResponse> readAllBookingItem(@RequestHeader("X-Sharer-User-Id") long userId,
-                                                             @RequestParam(defaultValue = "ALL") BookingState state) {
+                                                             @RequestParam(defaultValue = "ALL") String state) {
+        BookingState validState = BookingState.getBookingState(state);
         return null;
     }
 }

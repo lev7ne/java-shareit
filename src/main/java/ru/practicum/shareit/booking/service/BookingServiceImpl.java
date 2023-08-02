@@ -2,7 +2,7 @@ package ru.practicum.shareit.booking.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.BookingDtoRequest;
 import ru.practicum.shareit.booking.dto.BookingDtoResponse;
 import ru.practicum.shareit.booking.mapper.BookingDtoMapper;
 import ru.practicum.shareit.booking.model.Booking;
@@ -38,27 +38,27 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public BookingDtoResponse add(long bookerId, BookingDto bookingDto) {
+    public BookingDtoResponse add(long bookerId, BookingDtoRequest bookingDtoRequest) {
         Optional<User> optionalUser = userRepository.findById(bookerId);
         if (optionalUser.isEmpty()) {
             throw new NotFoundException("Пользователь с id: " + bookerId + " не найден или ещё не создан.");
         }
 
-        Optional<Item> optionalItem = itemRepository.findById(bookingDto.getItemId());
+        Optional<Item> optionalItem = itemRepository.findById(bookingDtoRequest.getItemId());
         if (optionalItem.isEmpty()) {
-            throw new NotFoundException("Предмет с id: " + bookingDto.getItemId() + " не найден или ещё не создан.");
+            throw new NotFoundException("Предмет с id: " + bookingDtoRequest.getItemId() + " не найден или ещё не создан.");
         }
 
         if (optionalUser.get().getId() == optionalItem.get().getOwner().getId()) {
-            throw new BookingUnavailableException("Нельзя забронировать свой предмет.");
+            throw new NotFoundException("Нельзя забронировать свой предмет.");
         }
 
         if (!optionalItem.get().getAvailable()) {
             throw new BookingUnavailableException(optionalItem.get().getName() + " - уже находится в брони.");
         }
 
-        PeriodValidator.StartAndEndTimeValidation(bookingDto);
-        Booking booking = BookingDtoMapper.toBooking(bookingDto, optionalItem.get(), optionalUser.get(), BookingStatus.WAITING);
+        PeriodValidator.StartAndEndTimeValidation(bookingDtoRequest);
+        Booking booking = BookingDtoMapper.toBooking(bookingDtoRequest, optionalItem.get(), optionalUser.get(), BookingStatus.WAITING);
 
         return BookingDtoMapper.toBookingDtoResponse(bookingRepository.save(booking));
     }

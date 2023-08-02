@@ -16,6 +16,6 @@ public enum BookingState {
                 return value;
             }
         }
-        throw new UnavailableStateException("UNSUPPORTED_STATUS");
+        throw new UnavailableStateException("Unknown state: " + state);
     }
 }
