@@ -2,6 +2,7 @@ package ru.practicum.shareit.booking.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.booking.model.Booking;
 
@@ -39,7 +40,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "order by b.start desc ")
     Collection<Booking> findAllBookingsByBookingStatusForBooker(long bookerId, String status);
 
-    //Получение списка бронирований для всех вещей текущего пользователя.
     @Query("select b from Booking b " +
             "where b.item.owner.id = ?1 " +
             "and b.start <= ?2 " +
@@ -64,4 +64,28 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "and upper(b.bookingStatus) = upper(?2) " +
             "order by b.start desc ")
     Collection<Booking> findAllBookingsByBookingStatusForOwner(long bookerId, String status);
+
+    @Query(value = "select * " +
+            "from bookings " +
+            "       join public.items i on i.id = bookings.item_id " +
+            "       join public.users u on u.id = i.owner_id " +
+            "where item_id = :itemId " +
+            "    and i.owner_id = :userId " +
+            "    and bookings.status = 'APPROVED' " +
+            "    and bookings.start_date < now() " +
+            "    and bookings.end_date in (select max(bookings.end_date) from bookings) ", nativeQuery = true)
+    Booking findAnyBookingLast(@Param("itemId") long itemId, @Param("userId") long userId);
+
+
+    @Query(value = "select * " +
+            "from bookings " +
+            "         join public.items i on i.id = bookings.item_id " +
+            "         join public.users u on u.id = i.owner_id " +
+            "where item_id = :itemId " +
+            "  and i.owner_id = :userId " +
+            "  and bookings.status = 'APPROVED' " +
+            "  and bookings.start_date > now() " +
+            "  and bookings.start_date in (select min(bookings.end_date) from bookings) ", nativeQuery = true)
+    Booking findAnyBookingNext(@Param("itemId") long itemId, @Param("userId") long userId);
+
 }

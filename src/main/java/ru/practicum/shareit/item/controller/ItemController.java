@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoBooking;
-import ru.practicum.shareit.item.dto.ItemDtoBookingExtended;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
@@ -38,8 +37,9 @@ public class ItemController {
     }
 
     @GetMapping("/{id}")
-    public ItemDtoBooking getItem(@PathVariable long id) {
-        return itemService.getById(id);
+    public ItemDtoBooking getItem(@PathVariable long id,
+                                  @RequestHeader("X-Sharer-User-Id") long userId) {
+        return itemService.getById(id, userId);
     }
 
     @GetMapping
@@ -47,9 +47,4 @@ public class ItemController {
         return itemService.getAll(ownerId);
     }
 
-    @GetMapping("/{id}")
-    public ItemDtoBookingExtended getItemWithUser(@RequestHeader("X-Sharer-User-Id") long userId,
-                                                  @PathVariable long id) {
-        return itemService.getItemByIdWithUser(userId, id);
-    }
 }

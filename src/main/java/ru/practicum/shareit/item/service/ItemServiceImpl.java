@@ -6,7 +6,6 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoBooking;
-import ru.practicum.shareit.item.dto.ItemDtoBookingExtended;
 import ru.practicum.shareit.item.mapper.ItemDtoMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
@@ -74,13 +73,20 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDtoBooking getById(long itemId) {
+    public ItemDtoBooking getById(long itemId, long userId) {
         Optional<Item> optionalItem = itemRepository.findById(itemId);
         if (optionalItem.isEmpty()) {
             throw new NotFoundException("Предмет с id: " + itemId + " не найден или ещё не создан.");
         }
-        Booking booking = bookingRepository.findByItemId(itemId);
-        return ItemDtoMapper.mapToItemDtoBooking(optionalItem.get(), booking);
+        Item item = optionalItem.get();
+
+        if (item.getOwner().getId() == userId) {
+            Booking lastBooking = bookingRepository.findAnyBookingLast(itemId, userId);
+            Booking nextBooking = bookingRepository.findAnyBookingNext(itemId, userId);
+            return ItemDtoMapper.mapToItemDtoBooking(item, lastBooking, nextBooking);
+        }
+
+        return ItemDtoMapper.mapToItemDtoBooking(item, null, null);
     }
 
     @Override
@@ -102,8 +108,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDtoBookingExtended getItemByIdWithUser(long ownerId, long itemId) {
-        Item item = itemRepository.findItemByOwner_IdAndId(ownerId, itemId);
+    public ItemDtoBooking getItemByIdWithUser(long ownerId, long itemId) {
 
 
 

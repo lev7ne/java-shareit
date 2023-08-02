@@ -28,15 +28,15 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, Integer> handleBookingUnavailableException(final Exception e) {
+    public Map<String, Integer> handleBookingUnavailableException(final BookingUnavailableException e) {
         log.error("Некорректный запрос. {}", e.getMessage(), e);
         return Map.of("BAD_REQUEST", HttpStatus.BAD_REQUEST.value());
     }
 
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, Integer> handleUnavailableStateException(final Exception e) {
-        log.error("Некорректный запрос. {}", e.getMessage(), e);
-        return Map.of("Unknown state: UNSUPPORTED_STATUS", HttpStatus.BAD_REQUEST.value());
-    }
+//    @ExceptionHandler
+//    @ResponseStatus(HttpStatus.BAD_REQUEST)
+//    public Map<String, Integer> handleUnavailableStateException(final UnavailableStateException e) {
+//        log.error("Некорректный запрос. {}", e.getMessage(), e);
+//        return Map.of("Unknown state: UNSUPPORTED_STATUS", HttpStatus.BAD_REQUEST.value());
+//    }
 }

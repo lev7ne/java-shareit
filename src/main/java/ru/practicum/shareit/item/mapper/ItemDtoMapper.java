@@ -1,14 +1,10 @@
 package ru.practicum.shareit.item.mapper;
 
-import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.mapper.BookingDtoMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoBooking;
-import ru.practicum.shareit.item.dto.ItemDtoBookingExtended;
 import ru.practicum.shareit.item.model.Item;
-
-import java.time.Instant;
 
 public class ItemDtoMapper {
     public static Item mapToItem(ItemDto itemDto) {
@@ -29,25 +25,14 @@ public class ItemDtoMapper {
         );
     }
 
-    public static ItemDtoBooking mapToItemDtoBooking(Item item, Booking booking) {
+    public static ItemDtoBooking mapToItemDtoBooking(Item item, Booking lastBooking, Booking nextBooking) {
         return new ItemDtoBooking(
                 item.getId(),
                 item.getName(),
                 item.getDescription(),
                 item.getAvailable(),
-                booking != null ? Instant.from(booking.getStart()) : null,
-                booking != null ? Instant.from(booking.getEnd()) : null
-        );
-    }
-
-    public static ItemDtoBookingExtended mapToItemDtoBookingExtended(Item item, Booking lastBooking, Booking nextBooking) {
-        return new ItemDtoBookingExtended(
-                item.getId(),
-                item.getName(),
-                item.getDescription(),
-                item.getAvailable(),
-                BookingDtoMapper.toBookingDto(lastBooking),
-                BookingDtoMapper.toBookingDto(nextBooking)
+                lastBooking != null ? BookingDtoMapper.toBookingDto(lastBooking) : null,
+                nextBooking != null ? BookingDtoMapper.toBookingDto(nextBooking) : null
         );
     }
 }

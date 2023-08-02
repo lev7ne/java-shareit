@@ -39,9 +39,9 @@ public class BookingController {
 
     @GetMapping
     public Collection<BookingDtoResponse> readAllBookerBookings(@RequestHeader("X-Sharer-User-Id") long userId,
-                                                                @RequestParam(defaultValue = "ALL") BookingState state) {
-
-        return bookingService.readAllBookingsBooker(userId, state);
+                                                                @RequestParam(defaultValue = "ALL") String state) {
+        BookingState validState = BookingState.getBookingState(state);
+        return bookingService.readAllBookingsBooker(userId, validState);
     }
 
     @GetMapping("/bookings/owner")
