@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.mapper.BookingDtoMapper;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.dto.ItemDtoRequest;
 import ru.practicum.shareit.item.dto.ItemDtoResponse;
@@ -15,8 +16,10 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.util.exception.NoAccessException;
 import ru.practicum.shareit.util.exception.NotFoundException;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -82,8 +85,8 @@ public class ItemServiceImpl implements ItemService {
         Item item = optionalItem.get();
 
         if (item.getOwner().getId() == userId) {
-            Booking lastBooking = bookingRepository.findAnyBookingLast(itemId, userId);
-            Booking nextBooking = bookingRepository.findAnyBookingNext(itemId, userId);
+            Booking lastBooking = findLastBooking(itemId);
+            Booking nextBooking = findNextBooking(itemId);
 
             return ItemDtoMapper.mapToItemDtoResponseExtended(item,
                     lastBooking != null ? BookingDtoMapper.toBookingDtoShortResponse(lastBooking) : null,
@@ -96,9 +99,14 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Collection<ItemDtoResponse> getAll(long ownerId) {
-        return itemRepository.findAll().stream()
-                .filter(item -> item.getOwner().getId() == ownerId)
-                .map(ItemDtoMapper::mapToItemDtoResponse)
+        return itemRepository.findAllByOwner_IdOrderById(ownerId).stream()
+                .map(item -> {
+                    Booking lastBooking = findLastBooking(item.getId());
+                    Booking nextBooking = findNextBooking(item.getId());
+                    return ItemDtoMapper.mapToItemDtoResponseExtended(item,
+                            lastBooking != null ? BookingDtoMapper.toBookingDtoShortResponse(lastBooking) : null,
+                            nextBooking != null ? BookingDtoMapper.toBookingDtoShortResponse(nextBooking) : null);
+                })
                 .collect(Collectors.toList());
     }
 
@@ -112,11 +120,19 @@ public class ItemServiceImpl implements ItemService {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public ItemDtoResponse getItemByIdWithUser(long ownerId, long itemId) {
+    private Booking findLastBooking(long id) {
+        return bookingRepository.findAllByItem_Id(id).stream()
+                .filter(booking -> booking.getStart().isBefore(LocalDateTime.now()))
+                .filter(booking -> booking.getBookingStatus() == BookingStatus.APPROVED)
+                .max(Comparator.comparing(Booking::getEnd))
+                .orElse(null);
+    }
 
-
-
-        return null;
+    private Booking findNextBooking(long id) {
+        return bookingRepository.findAllByItem_Id(id).stream()
+                .filter(booking -> booking.getStart().isAfter(LocalDateTime.now()))
+                .filter(booking -> booking.getBookingStatus() == BookingStatus.APPROVED)
+                .min(Comparator.comparing(Booking::getStart))
+                .orElse(null);
     }
 }

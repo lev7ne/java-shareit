@@ -17,5 +17,4 @@ public interface ItemService {
 
     Collection<ItemDtoResponse> search(String text);
 
-    ItemDtoResponse getItemByIdWithUser(long userId, long id);
 }

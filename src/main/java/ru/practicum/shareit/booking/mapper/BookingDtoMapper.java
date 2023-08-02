@@ -8,7 +8,6 @@ import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.item.dto.ItemDtoRequest;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dto.UserDto;
-
 import ru.practicum.shareit.user.model.User;
 
 public class BookingDtoMapper {
@@ -26,7 +25,7 @@ public class BookingDtoMapper {
     public static BookingDtoResponseShort toBookingDtoShortResponse(Booking booking) {
         return new BookingDtoResponseShort(
                 booking.getId(),
-                booking.getItem().getOwner().getId()
+                booking.getBooker().getId()
         );
     }
 

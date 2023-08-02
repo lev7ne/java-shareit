@@ -65,27 +65,29 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "order by b.start desc ")
     Collection<Booking> findAllBookingsByBookingStatusForOwner(long bookerId, String status);
 
-    @Query(value = "select * " +
-            "from bookings " +
-            "       join public.items i on i.id = bookings.item_id " +
-            "       join public.users u on u.id = i.owner_id " +
-            "where item_id = :itemId " +
-            "    and i.owner_id = :userId " +
-            "    and bookings.status = 'APPROVED' " +
-            "    and bookings.start_date < now() " +
-            "    and bookings.end_date in (select max(bookings.end_date) from bookings) ", nativeQuery = true)
-    Booking findAnyBookingLast(@Param("itemId") long itemId, @Param("userId") long userId);
+//    @Query(value = "select * " +
+//            "from bookings " +
+//            "         join public.items i on i.id = bookings.item_id " +
+//            "         join public.users u on u.id = i.owner_id " +
+//            "where bookings.item_id = :itemId " +
+//            "  and i.owner_id = :userId " +
+//            "  and bookings.status = 'APPROVED' " +
+//            "  and date(bookings.start_date) < :now " +
+//            "order by start_date limit 1 ", nativeQuery = true)
+//    Booking findAnyBookingLast(@Param("itemId") long itemId, @Param("userId") long userId, @Param("now") LocalDateTime now);
+//
+//
+//    @Query(value = "select * " +
+//            "from bookings " +
+//            "         join public.items i on i.id = bookings.item_id " +
+//            "         join public.users u on u.id = i.owner_id " +
+//            "where bookings.item_id = :itemId  " +
+//            "  and i.owner_id = :userId " +
+//            "  and bookings.status = 'APPROVED' " +
+//            "  and date(bookings.start_date) > :now " +
+//            "order by start_date desc limit 1 ", nativeQuery = true)
+//    Booking findAnyBookingNext(@Param("itemId") long itemId, @Param("userId") long userId, @Param("now") LocalDateTime now);
 
 
-    @Query(value = "select * " +
-            "from bookings " +
-            "         join public.items i on i.id = bookings.item_id " +
-            "         join public.users u on u.id = i.owner_id " +
-            "where item_id = :itemId " +
-            "  and i.owner_id = :userId " +
-            "  and bookings.status = 'APPROVED' " +
-            "  and bookings.start_date > now() " +
-            "  and bookings.start_date in (select min(bookings.end_date) from bookings) ", nativeQuery = true)
-    Booking findAnyBookingNext(@Param("itemId") long itemId, @Param("userId") long userId);
-
+    Collection<Booking> findAllByItem_Id(long id);
 }

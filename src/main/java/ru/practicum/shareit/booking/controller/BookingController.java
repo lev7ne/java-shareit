@@ -26,8 +26,8 @@ public class BookingController {
 
     @PatchMapping("/{id}")
     public BookingDtoResponse updateApproval(@RequestHeader("X-Sharer-User-Id") long ownerId,
-                                           @PathVariable long id,
-                                           @RequestParam("approved") boolean approved) {
+                                             @PathVariable long id,
+                                             @RequestParam("approved") boolean approved) {
         return bookingService.update(ownerId, id, approved);
     }
 
