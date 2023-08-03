@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import ru.practicum.shareit.booking.dto.BookingDtoResponseShort;
 
+import java.util.Collection;
+
 @Data
 @AllArgsConstructor
 public class ItemDtoResponse {
@@ -13,4 +15,5 @@ public class ItemDtoResponse {
     private Boolean available;
     private BookingDtoResponseShort lastBooking;
     private BookingDtoResponseShort nextBooking;
+    private Collection<CommentDto> comments;
 }

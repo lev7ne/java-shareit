@@ -13,9 +13,9 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
-import ru.practicum.shareit.util.exception.BookingUnavailableException;
 import ru.practicum.shareit.util.exception.NoAccessException;
 import ru.practicum.shareit.util.exception.NotFoundException;
+import ru.practicum.shareit.util.exception.UnavailableException;
 import ru.practicum.shareit.util.exception.UnavailableStateException;
 import ru.practicum.shareit.util.validator.PeriodValidator;
 
@@ -54,7 +54,7 @@ public class BookingServiceImpl implements BookingService {
         }
 
         if (!optionalItem.get().getAvailable()) {
-            throw new BookingUnavailableException(optionalItem.get().getName() + " - уже находится в брони.");
+            throw new UnavailableException(optionalItem.get().getName() + " - уже находится в брони.");
         }
 
         PeriodValidator.StartAndEndTimeValidation(bookingDtoRequest);
@@ -73,7 +73,7 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = optionalBooking.get();
 
         if (booking.getBookingStatus().equals(BookingStatus.APPROVED) && approved) {
-            throw new BookingUnavailableException("Бронирование подтверждено ранее.");
+            throw new UnavailableException("Бронирование подтверждено ранее.");
         }
 
         if (optionalBooking.get().getItem().getOwner().getId() != ownerId) {
@@ -81,7 +81,7 @@ public class BookingServiceImpl implements BookingService {
         }
 
         if (!booking.getItem().getAvailable()) {
-            throw new BookingUnavailableException(booking.getItem().getName() + " забронирован ранее.");
+            throw new UnavailableException(booking.getItem().getName() + " забронирован ранее.");
         }
 
         Optional<User> optionalUser = userRepository.findById(booking.getBooker().getId());

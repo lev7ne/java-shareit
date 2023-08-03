@@ -29,7 +29,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, Integer> handleBookingUnavailableException(final BookingUnavailableException e) {
+    public Map<String, Integer> handleUnavailableException(final UnavailableException e) {
         log.error("Конфликт между запросом пользователя и сервером. {}", e.getMessage(), e);
         return Map.of("BAD_REQUEST", HttpStatus.BAD_REQUEST.value());
     }

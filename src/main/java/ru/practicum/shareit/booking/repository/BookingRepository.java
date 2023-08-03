@@ -2,7 +2,6 @@ package ru.practicum.shareit.booking.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.booking.model.Booking;
 
@@ -11,7 +10,6 @@ import java.util.Collection;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
-    Booking findByItemId(long itemId);
 
     Collection<Booking> findAllByBooker_IdOrderByStartDesc(long bookerId);
 
@@ -71,4 +69,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     Collection<Booking> findAllBookingsByBookingStatusForOwner(long bookerId, String status);
 
     Collection<Booking> findAllByItem_Id(long id);
+
+    Booking findBookingByBooker_IdAndItem_Id(long bookerId, long itemId);
 }

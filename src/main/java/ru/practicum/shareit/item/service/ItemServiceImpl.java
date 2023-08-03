@@ -2,19 +2,25 @@ package ru.practicum.shareit.item.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.dto.BookingDtoResponseShort;
 import ru.practicum.shareit.booking.mapper.BookingDtoMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDtoRequest;
 import ru.practicum.shareit.item.dto.ItemDtoResponse;
+import ru.practicum.shareit.item.mapper.CommentDtoMapper;
 import ru.practicum.shareit.item.mapper.ItemDtoMapper;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.util.exception.NoAccessException;
 import ru.practicum.shareit.util.exception.NotFoundException;
+import ru.practicum.shareit.util.exception.UnavailableException;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -29,12 +35,14 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
+    private final CommentRepository commentRepository;
 
     @Autowired
-    public ItemServiceImpl(ItemRepository itemRepository, UserRepository userRepository, BookingRepository bookingRepository) {
+    public ItemServiceImpl(ItemRepository itemRepository, UserRepository userRepository, BookingRepository bookingRepository, CommentRepository commentRepository) {
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
         this.bookingRepository = bookingRepository;
+        this.commentRepository = commentRepository;
     }
 
     @Override
@@ -84,17 +92,17 @@ public class ItemServiceImpl implements ItemService {
         }
         Item item = optionalItem.get();
 
-        if (item.getOwner().getId() == userId) {
-            Booking lastBooking = findLastBooking(itemId);
-            Booking nextBooking = findNextBooking(itemId);
+        BookingDtoResponseShort lastBooking = null;
+        BookingDtoResponseShort nextBooking = null;
 
-            return ItemDtoMapper.mapToItemDtoResponseExtended(item,
-                    lastBooking != null ? BookingDtoMapper.toBookingDtoShortResponse(lastBooking) : null,
-                    nextBooking != null ? BookingDtoMapper.toBookingDtoShortResponse(nextBooking) : null
-            );
+        if (item.getOwner().getId() == userId) {
+            lastBooking = findLastBooking(itemId) != null ? BookingDtoMapper.toBookingDtoShortResponse(findLastBooking(itemId)) : null;
+            nextBooking = findNextBooking(itemId) != null ? BookingDtoMapper.toBookingDtoShortResponse(findNextBooking(itemId)) : null;
         }
 
-        return ItemDtoMapper.mapToItemDtoResponse(item);
+        Collection<CommentDto> comments = findComments(itemId);
+
+        return ItemDtoMapper.mapToItemDtoResponseExtended(item, lastBooking, nextBooking, comments);
     }
 
     @Override
@@ -103,9 +111,11 @@ public class ItemServiceImpl implements ItemService {
                 .map(item -> {
                     Booking lastBooking = findLastBooking(item.getId());
                     Booking nextBooking = findNextBooking(item.getId());
+                    Collection<CommentDto> comments = findComments(item.getId());
                     return ItemDtoMapper.mapToItemDtoResponseExtended(item,
                             lastBooking != null ? BookingDtoMapper.toBookingDtoShortResponse(lastBooking) : null,
-                            nextBooking != null ? BookingDtoMapper.toBookingDtoShortResponse(nextBooking) : null);
+                            nextBooking != null ? BookingDtoMapper.toBookingDtoShortResponse(nextBooking) : null,
+                            comments.isEmpty() ? null : comments);
                 })
                 .collect(Collectors.toList());
     }
@@ -134,5 +144,49 @@ public class ItemServiceImpl implements ItemService {
                 .filter(booking -> booking.getBookingStatus() == BookingStatus.APPROVED)
                 .min(Comparator.comparing(Booking::getStart))
                 .orElse(null);
+    }
+
+    @Override
+    public CommentDto addComment(long bookerId, CommentDto commentDto, long itemId) {
+        Optional<User> optionalUser = userRepository.findById(bookerId);
+        if (optionalUser.isEmpty()) {
+            throw new NotFoundException("Пользователь с id: " + bookerId + " не найден или ещё не создан.");
+        }
+
+        Collection<Booking> itemBookings = bookingRepository.findAllByItem_Id(itemId)
+                .stream()
+                .filter(booking -> booking.getBooker().getId() == bookerId)
+                .filter(booking -> booking.getBookingStatus() == BookingStatus.APPROVED)
+                .collect(Collectors.toList());
+
+        if (itemBookings.isEmpty()) {
+            throw new UnavailableException("Пользователь с id: " + bookerId + " не бронировал вещь с id: " + itemId);
+        }
+
+        Collection<Booking> pastOrPresentBookings = itemBookings.stream()
+                .filter(booking -> booking.getStart().isBefore(LocalDateTime.now()))
+                .collect(Collectors.toList());
+
+        if (pastOrPresentBookings.isEmpty()) {
+            throw new UnavailableException("Отзыв можно оставить только после состоявшегося бронирование");
+        }
+
+        Optional<Item> optionalItem = itemRepository.findById(itemId);
+        if (optionalItem.isEmpty()) {
+            throw new NotFoundException("Предмет с id: " + itemId + " не найден или ещё не создан.");
+        }
+
+        commentDto.setCreated(LocalDateTime.now());
+
+        Comment comment = CommentDtoMapper.mapToComment(commentDto, optionalItem.get(), optionalUser.get());
+
+        return CommentDtoMapper.mapToCommentDto(commentRepository.save(comment));
+    }
+
+    private Collection<CommentDto> findComments(long itemId) {
+        return commentRepository.findAllByItemId(itemId)
+                .stream()
+                .map(CommentDtoMapper::mapToCommentDto)
+                .collect(Collectors.toList());
     }
 }
