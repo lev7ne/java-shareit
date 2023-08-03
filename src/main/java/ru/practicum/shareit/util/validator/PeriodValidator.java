@@ -6,11 +6,12 @@ import ru.practicum.shareit.util.exception.UnavailableException;
 import java.time.LocalDateTime;
 
 public class PeriodValidator {
-    public static void StartAndEndTimeValidation(BookingDtoRequest bookingDtoRequest) {
+    public static void startAndEndTimeValidation(BookingDtoRequest bookingDtoRequest) {
         if (bookingDtoRequest.getStart() == null) {
             throw new UnavailableException("Отсутствует дата начала бронирование.");
         }
         if (bookingDtoRequest.getEnd() == null) {
+
             throw new UnavailableException("Отсутствует дата окончания бронирования.");
         }
 

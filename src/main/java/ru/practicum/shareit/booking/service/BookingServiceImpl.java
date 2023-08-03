@@ -57,7 +57,7 @@ public class BookingServiceImpl implements BookingService {
             throw new UnavailableException(optionalItem.get().getName() + " - уже находится в брони.");
         }
 
-        PeriodValidator.StartAndEndTimeValidation(bookingDtoRequest);
+        PeriodValidator.startAndEndTimeValidation(bookingDtoRequest);
         Booking booking = BookingDtoMapper.toBooking(bookingDtoRequest, optionalItem.get(), optionalUser.get(), BookingStatus.WAITING);
 
         return BookingDtoMapper.toBookingDtoResponse(bookingRepository.save(booking));
