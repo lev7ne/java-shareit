@@ -42,6 +42,11 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Query("select b from Booking b " +
             "where b.item.owner.id = ?1 " +
+            "order by b.start desc")
+    Collection<Booking> findAllByOwnerId(long ownerId);
+
+    @Query("select b from Booking b " +
+            "where b.item.owner.id = ?1 " +
             "and b.start <= ?2 " +
             "and b.end >= ?2 " +
             "order by b.start desc ")
@@ -64,30 +69,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "and upper(b.bookingStatus) = upper(?2) " +
             "order by b.start desc ")
     Collection<Booking> findAllBookingsByBookingStatusForOwner(long bookerId, String status);
-
-//    @Query(value = "select * " +
-//            "from bookings " +
-//            "         join public.items i on i.id = bookings.item_id " +
-//            "         join public.users u on u.id = i.owner_id " +
-//            "where bookings.item_id = :itemId " +
-//            "  and i.owner_id = :userId " +
-//            "  and bookings.status = 'APPROVED' " +
-//            "  and date(bookings.start_date) < :now " +
-//            "order by start_date limit 1 ", nativeQuery = true)
-//    Booking findAnyBookingLast(@Param("itemId") long itemId, @Param("userId") long userId, @Param("now") LocalDateTime now);
-//
-//
-//    @Query(value = "select * " +
-//            "from bookings " +
-//            "         join public.items i on i.id = bookings.item_id " +
-//            "         join public.users u on u.id = i.owner_id " +
-//            "where bookings.item_id = :itemId  " +
-//            "  and i.owner_id = :userId " +
-//            "  and bookings.status = 'APPROVED' " +
-//            "  and date(bookings.start_date) > :now " +
-//            "order by start_date desc limit 1 ", nativeQuery = true)
-//    Booking findAnyBookingNext(@Param("itemId") long itemId, @Param("userId") long userId, @Param("now") LocalDateTime now);
-
 
     Collection<Booking> findAllByItem_Id(long id);
 }

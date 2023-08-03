@@ -129,8 +129,8 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Collection<BookingDtoResponse> readAllBookingsBooker(long bookerId, BookingState state) {
-        Optional<User> owner = userRepository.findById(bookerId);
-        if (owner.isEmpty()) {
+        Optional<User> booker = userRepository.findById(bookerId);
+        if (booker.isEmpty()) {
             throw new NotFoundException("Пользователь с id: " + bookerId + " не найден или ещё не создан.");
         }
 
@@ -171,7 +171,6 @@ public class BookingServiceImpl implements BookingService {
         if (owner.isEmpty()) {
             throw new NotFoundException("Пользователь с id: " + ownerId + " не найден или ещё не создан.");
         }
-
         switch (state) {
             case CURRENT:
                 return bookingRepository.findAllBookingsOwnerCurrent(ownerId, LocalDateTime.now())
@@ -195,6 +194,10 @@ public class BookingServiceImpl implements BookingService {
                         .map(BookingDtoMapper::toBookingDtoResponse)
                         .collect(Collectors.toList());
             case ALL:
+                return bookingRepository.findAllByOwnerId(ownerId)
+                        .stream()
+                        .map(BookingDtoMapper::toBookingDtoResponse)
+                        .collect(Collectors.toList());
             default:
                 throw new UnavailableStateException("Недопустимый параметр state.");
         }
