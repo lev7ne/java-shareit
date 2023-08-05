@@ -25,7 +25,7 @@ public class Booking {
     @Column(name = "end_date")
     private LocalDateTime end;
     @ManyToOne
-    @JoinColumn(name = "item_id", referencedColumnName = "id")
+    @JoinColumn(name = "item_id")
     private Item item;
     @ManyToOne
     @JoinColumn(name = "booker_id", referencedColumnName = "id")
@@ -34,4 +34,11 @@ public class Booking {
     @Column(name = "status")
     private BookingStatus bookingStatus;
 
+    public Booking(LocalDateTime start, LocalDateTime end, Item item, User booker, BookingStatus bookingStatus) {
+        this.start = start;
+        this.end = end;
+        this.item = item;
+        this.booker = booker;
+        this.bookingStatus = bookingStatus;
+    }
 }

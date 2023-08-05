@@ -34,7 +34,7 @@ public class BookingController {
     @GetMapping("/{bookingId}")
     public BookingDtoResponse readAnyBooking(@RequestHeader("X-Sharer-User-Id") long userId,
                                              @PathVariable long bookingId) {
-        return bookingService.findAny(userId, bookingId);
+        return bookingService.find(userId, bookingId);
     }
 
     @GetMapping

@@ -8,16 +8,16 @@ import java.util.Collection;
 
 
 public interface ItemService {
-    ItemDtoResponse add(long ownerId, ItemDtoRequest itemDto);
+    ItemDtoResponse save(long ownerId, ItemDtoRequest itemDto);
 
     ItemDtoResponse update(long itemId, ItemDtoRequest itemDto, long ownerId);
 
-    ItemDtoResponse getAny(long itemId, long userId);
+    ItemDtoResponse find(long itemId, long userId);
 
     Collection<ItemDtoResponse> getAll(long ownerId);
 
     Collection<ItemDtoResponse> search(String text);
 
-    CommentDto addComment(long authorId, CommentDto commentDto, long itemId);
+    CommentDto saveComment(long authorId, CommentDto commentDto, long itemId);
 
 }

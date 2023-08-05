@@ -18,15 +18,14 @@ import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
-import ru.practicum.shareit.util.exception.NoAccessException;
-import ru.practicum.shareit.util.exception.NotFoundException;
+import ru.practicum.shareit.util.exception.AccessDeniedException;
 import ru.practicum.shareit.util.exception.UnavailableException;
+import ru.practicum.shareit.util.validator.ObjectHelper;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -46,29 +45,21 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDtoResponse add(long ownerId, ItemDtoRequest itemDto) {
-        Optional<User> optionalUser = userRepository.findById(ownerId);
-        if (optionalUser.isEmpty()) {
-            throw new NotFoundException("Пользователь с id: " + ownerId + " не найден или ещё не создан.");
-        }
+    public ItemDtoResponse save(long ownerId, ItemDtoRequest itemDto) {
+        User owner = ObjectHelper.findUserById(userRepository, ownerId);
 
         Item item = ItemDtoMapper.mapToItem(itemDto);
-        item.setOwner(optionalUser.get());
+        item.setOwner(owner);
 
         return ItemDtoMapper.mapToItemDtoResponse(itemRepository.save(item));
     }
 
     @Override
     public ItemDtoResponse update(long ownerId, ItemDtoRequest itemDto, long itemId) {
-        Optional<Item> optionalItem = itemRepository.findById(itemId);
-        if (optionalItem.isEmpty()) {
-            throw new NotFoundException("Предмет с id: " + itemId + " не найден или ещё не создан.");
-        }
+        Item updatedItem = ObjectHelper.findItemById(itemRepository, itemId);
 
-        Item updatedItem = optionalItem.get();
-
-        if (optionalItem.get().getOwner().getId() != ownerId) {
-            throw new NoAccessException("Только владельцу вещи разрешено редактирование.");
+        if (updatedItem.getOwner().getId() != ownerId) {
+            throw new AccessDeniedException("Только владельцу предмета разрешено редактирование.");
         }
 
         if (itemDto.getName() != null) {
@@ -85,19 +76,15 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDtoResponse getAny(long itemId, long userId) {
-        Optional<Item> optionalItem = itemRepository.findById(itemId);
-        if (optionalItem.isEmpty()) {
-            throw new NotFoundException("Предмет с id: " + itemId + " не найден или ещё не создан.");
-        }
-        Item item = optionalItem.get();
+    public ItemDtoResponse find(long itemId, long userId) {
+        Item item = ObjectHelper.findItemById(itemRepository, itemId);
 
         BookingDtoResponseShort lastBooking = null;
         BookingDtoResponseShort nextBooking = null;
 
         if (item.getOwner().getId() == userId) {
-            lastBooking = findLastBooking(itemId) != null ? BookingDtoMapper.toBookingDtoShortResponse(findLastBooking(itemId)) : null;
-            nextBooking = findNextBooking(itemId) != null ? BookingDtoMapper.toBookingDtoShortResponse(findNextBooking(itemId)) : null;
+            lastBooking = findLastBooking(itemId) != null ? BookingDtoMapper.toBookingDtoResponseShort(findLastBooking(itemId)) : null;
+            nextBooking = findNextBooking(itemId) != null ? BookingDtoMapper.toBookingDtoResponseShort(findNextBooking(itemId)) : null;
         }
 
         Collection<CommentDto> comments = findComments(itemId);
@@ -113,8 +100,8 @@ public class ItemServiceImpl implements ItemService {
                     Booking nextBooking = findNextBooking(item.getId());
                     Collection<CommentDto> comments = findComments(item.getId());
                     return ItemDtoMapper.mapToItemDtoResponseExtended(item,
-                            lastBooking != null ? BookingDtoMapper.toBookingDtoShortResponse(lastBooking) : null,
-                            nextBooking != null ? BookingDtoMapper.toBookingDtoShortResponse(nextBooking) : null,
+                            lastBooking != null ? BookingDtoMapper.toBookingDtoResponseShort(lastBooking) : null,
+                            nextBooking != null ? BookingDtoMapper.toBookingDtoResponseShort(nextBooking) : null,
                             comments.isEmpty() ? null : comments);
                 })
                 .collect(Collectors.toList());
@@ -147,11 +134,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public CommentDto addComment(long bookerId, CommentDto commentDto, long itemId) {
-        Optional<User> optionalUser = userRepository.findById(bookerId);
-        if (optionalUser.isEmpty()) {
-            throw new NotFoundException("Пользователь с id: " + bookerId + " не найден или ещё не создан.");
-        }
+    public CommentDto saveComment(long bookerId, CommentDto commentDto, long itemId) {
+        User booker = ObjectHelper.findUserById(userRepository, bookerId);
 
         Collection<Booking> itemBookings = bookingRepository.findAllByItem_Id(itemId)
                 .stream()
@@ -168,17 +152,14 @@ public class ItemServiceImpl implements ItemService {
                 .collect(Collectors.toList());
 
         if (pastOrPresentBookings.isEmpty()) {
-            throw new UnavailableException("Отзыв можно оставить только после состоявшегося бронирование");
+            throw new UnavailableException("Отзыв можно оставить только после состоявшегося бронирования.");
         }
 
-        Optional<Item> optionalItem = itemRepository.findById(itemId);
-        if (optionalItem.isEmpty()) {
-            throw new NotFoundException("Предмет с id: " + itemId + " не найден или ещё не создан.");
-        }
+        Item item = ObjectHelper.findItemById(itemRepository, itemId);
 
         commentDto.setCreated(LocalDateTime.now());
 
-        Comment comment = CommentDtoMapper.mapToComment(commentDto, optionalItem.get(), optionalUser.get());
+        Comment comment = CommentDtoMapper.mapToComment(commentDto, item, booker);
 
         return CommentDtoMapper.mapToCommentDto(commentRepository.save(comment));
     }

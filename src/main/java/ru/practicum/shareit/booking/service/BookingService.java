@@ -11,7 +11,7 @@ public interface BookingService {
 
     BookingDtoResponse update(long ownerId, long bookingId, boolean approved);
 
-    BookingDtoResponse findAny(long ownerId, long bookingId);
+    BookingDtoResponse find(long ownerId, long bookingId);
 
     Collection<BookingDtoResponse> readAllBookingsBooker(long bookerId, BookingState state);
 

@@ -6,10 +6,9 @@ import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserDtoMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
-import ru.practicum.shareit.util.exception.NotFoundException;
+import ru.practicum.shareit.util.validator.ObjectHelper;
 
 import java.util.Collection;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,11 +28,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto find(long id) {
-        Optional<User> optionalUser = userRepository.findById(id);
-        if (optionalUser.isEmpty()) {
-            throw new NotFoundException("Пользователь с id: " + id + " не найден или ещё не создан.");
-        }
-        return UserDtoMapper.toUserDto(optionalUser.get());
+        return UserDtoMapper.toUserDto(ObjectHelper.findUserById(userRepository, id));
     }
 
     @Override
@@ -50,16 +45,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto update(long id, UserDto userDto) {
-        UserDto updatedUserDto = find(id);
+        User user = ObjectHelper.findUserById(userRepository, id);
 
         if (userDto.getName() != null) {
-            updatedUserDto.setName(userDto.getName());
+            user.setName(userDto.getName());
         }
-
         if (userDto.getEmail() != null) {
-            updatedUserDto.setEmail(userDto.getEmail());
+            user.setEmail(userDto.getEmail());
         }
 
-        return UserDtoMapper.toUserDto(userRepository.save(UserDtoMapper.toUser(updatedUserDto)));
+        return UserDtoMapper.toUserDto(userRepository.save(user));
     }
 }

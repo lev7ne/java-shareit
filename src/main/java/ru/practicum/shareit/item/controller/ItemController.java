@@ -23,7 +23,7 @@ public class ItemController {
     @PostMapping
     public ItemDtoResponse createItem(@RequestHeader("X-Sharer-User-Id") long ownerId,
                                       @Valid @RequestBody ItemDtoRequest itemDto) {
-        return itemService.add(ownerId, itemDto);
+        return itemService.save(ownerId, itemDto);
     }
 
     @PatchMapping("/{id}")
@@ -40,7 +40,7 @@ public class ItemController {
     @GetMapping("/{id}")
     public ItemDtoResponse getItem(@PathVariable long id,
                                    @RequestHeader("X-Sharer-User-Id") long userId) {
-        return itemService.getAny(id, userId);
+        return itemService.find(id, userId);
     }
 
     @GetMapping
@@ -51,6 +51,6 @@ public class ItemController {
     @PostMapping("/{itemId}/comment")
     public CommentDto createComment(@RequestHeader("X-Sharer-User-Id") long bookerId,
                                     @Valid @RequestBody CommentDto commentDto, @PathVariable long itemId) {
-        return itemService.addComment(bookerId, commentDto, itemId);
+        return itemService.saveComment(bookerId, commentDto, itemId);
     }
 }

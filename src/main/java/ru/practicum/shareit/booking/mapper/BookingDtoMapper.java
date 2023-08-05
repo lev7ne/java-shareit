@@ -11,18 +11,17 @@ import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
 public class BookingDtoMapper {
-    public static Booking toBooking(BookingDtoRequest bookingDto, Item item, User user, BookingStatus status) {
+    public static Booking toBooking(BookingDtoRequest bookingDtoRequest, Item item, User user) {
         return new Booking(
-                bookingDto.getId(),
-                bookingDto.getStart(),
-                bookingDto.getEnd(),
+                bookingDtoRequest.getStart(),
+                bookingDtoRequest.getEnd(),
                 item,
                 user,
-                status
+                BookingStatus.WAITING
         );
     }
 
-    public static BookingDtoResponseShort toBookingDtoShortResponse(Booking booking) {
+    public static BookingDtoResponseShort toBookingDtoResponseShort(Booking booking) {
         return new BookingDtoResponseShort(
                 booking.getId(),
                 booking.getBooker().getId()

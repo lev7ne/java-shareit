@@ -7,22 +7,25 @@ import ru.practicum.shareit.booking.dto.BookingDtoResponse;
 import ru.practicum.shareit.booking.mapper.BookingDtoMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingState;
-import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
-import ru.practicum.shareit.util.exception.NoAccessException;
-import ru.practicum.shareit.util.exception.NotFoundException;
+import ru.practicum.shareit.util.exception.AccessDeniedException;
+import ru.practicum.shareit.util.exception.ObjectNotFoundException;
 import ru.practicum.shareit.util.exception.UnavailableException;
 import ru.practicum.shareit.util.exception.UnavailableStateException;
-import ru.practicum.shareit.util.validator.PeriodValidator;
+import ru.practicum.shareit.util.validator.ObjectHelper;
+import ru.practicum.shareit.util.validator.Validator;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static ru.practicum.shareit.booking.model.BookingStatus.APPROVED;
+import static ru.practicum.shareit.booking.model.BookingStatus.REJECTED;
+
 
 @Service
 public class BookingServiceImpl implements BookingService {
@@ -39,100 +42,59 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDtoResponse add(long bookerId, BookingDtoRequest bookingDtoRequest) {
-        Optional<User> optionalUser = userRepository.findById(bookerId);
-        if (optionalUser.isEmpty()) {
-            throw new NotFoundException("Пользователь с id: " + bookerId + " не найден или ещё не создан.");
+        User booker = ObjectHelper.findUserById(userRepository, bookerId);
+        Item item = ObjectHelper.findItemById(itemRepository, bookingDtoRequest.getItemId());
+
+
+        if (booker.getId() == item.getOwner().getId()) {
+            throw new ObjectNotFoundException("Нельзя забронировать свой предмет."); //???
+        }
+        if (!item.getAvailable()) {
+            throw new UnavailableException(item.getName() + " - забронирован другим пользователем.");
         }
 
-        Optional<Item> optionalItem = itemRepository.findById(bookingDtoRequest.getItemId());
-        if (optionalItem.isEmpty()) {
-            throw new NotFoundException("Предмет с id: " + bookingDtoRequest.getItemId() + " не найден или ещё не создан.");
-        }
-
-        if (optionalUser.get().getId() == optionalItem.get().getOwner().getId()) {
-            throw new NotFoundException("Нельзя забронировать свой предмет.");
-        }
-
-        if (!optionalItem.get().getAvailable()) {
-            throw new UnavailableException(optionalItem.get().getName() + " - уже находится в брони.");
-        }
-
-        PeriodValidator.startAndEndTimeValidation(bookingDtoRequest);
-        Booking booking = BookingDtoMapper.toBooking(bookingDtoRequest, optionalItem.get(), optionalUser.get(), BookingStatus.WAITING);
+        Validator.startAndEndTimeBookingValidation(bookingDtoRequest);
+        Booking booking = BookingDtoMapper.toBooking(bookingDtoRequest, item, booker);
 
         return BookingDtoMapper.toBookingDtoResponse(bookingRepository.save(booking));
     }
 
     @Override
-    public BookingDtoResponse update(long ownerId, long id, boolean approved) {
-        Optional<Booking> optionalBooking = bookingRepository.findById(id);
-        if (optionalBooking.isEmpty()) {
-            throw new NotFoundException("Бронирование с id: " + id + " не найдено или ещё не создано.");
-        }
+    public BookingDtoResponse update(long ownerId, long bookingId, boolean approved) {
+        Booking booking = ObjectHelper.findBookingById(bookingRepository, bookingId);
 
-        Booking booking = optionalBooking.get();
-
-        if (booking.getBookingStatus().equals(BookingStatus.APPROVED) && approved) {
+        if (booking.getBookingStatus().equals(APPROVED) && approved) {
             throw new UnavailableException("Бронирование подтверждено ранее.");
         }
-
-        if (optionalBooking.get().getItem().getOwner().getId() != ownerId) {
-            throw new NoAccessException("Только владелец вещи может работать с запросом.");
+        if (booking.getItem().getOwner().getId() != ownerId) {
+            throw new AccessDeniedException("Только владелец вещи может работать с запросом.");
         }
-
         if (!booking.getItem().getAvailable()) {
             throw new UnavailableException(booking.getItem().getName() + " забронирован ранее.");
         }
 
-        Optional<User> optionalUser = userRepository.findById(booking.getBooker().getId());
-        if (optionalUser.isEmpty()) {
-            throw new NotFoundException("Пользователь с id: " + booking.getBooker().getId() + " не найден или ещё не создан.");
-        }
+        ObjectHelper.findUserById(userRepository, ownerId);
 
-        booking.setBookingStatus(approved ? BookingStatus.APPROVED : BookingStatus.REJECTED);
+        booking.setBookingStatus(approved ? APPROVED : REJECTED);
 
         return BookingDtoMapper.toBookingDtoResponse(bookingRepository.save(booking));
     }
 
     @Override
-    public BookingDtoResponse findAny(long ownerId, long bookingId) {
-        Optional<User> owner = userRepository.findById(ownerId);
-        if (owner.isEmpty()) {
-            throw new NotFoundException("Пользователь с id: " + ownerId + " не найден или ещё не создан.");
+    public BookingDtoResponse find(long userId, long bookingId) {
+        ObjectHelper.findUserById(userRepository, userId);
+        Booking booking = ObjectHelper.findBookingById(bookingRepository, bookingId);
+
+        if (userId == booking.getBooker().getId() || userId == booking.getItem().getOwner().getId()) {
+            return BookingDtoMapper.toBookingDtoResponse(booking);
+        } else {
+            throw new AccessDeniedException("Просмотр разрешен только владельцу предмета или бронирования.");
         }
-
-        Optional<Booking> optionalBooking = bookingRepository.findById(bookingId);
-        if (optionalBooking.isEmpty()) {
-            throw new NotFoundException("Бронирование с id: " + bookingId + " не найдено или ещё не создано.");
-        }
-
-        Booking booking = optionalBooking.get();
-
-        long anyBookerId = booking.getBooker().getId();
-        long anyOwnerId = booking.getItem().getOwner().getId();
-
-        if (anyBookerId != ownerId && anyOwnerId != ownerId) {
-            throw new NotFoundException("Бронирование с id " + bookingId + " не найдено для пользователя с id " + ownerId);
-        }
-
-        Optional<User> optionalUser = userRepository.findById(anyBookerId);
-        if (optionalUser.isEmpty()) {
-            throw new NotFoundException("Пользователь с id: " + anyBookerId + " не найден или ещё не создан.");
-        }
-        Optional<Item> optionalItem = itemRepository.findById(booking.getItem().getId());
-        if (optionalItem.isEmpty()) {
-            throw new NotFoundException("Предмет с id: " + booking.getItem().getId() + " не найден или ещё не создан.");
-        }
-
-        return BookingDtoMapper.toBookingDtoResponse(booking);
     }
 
     @Override
     public Collection<BookingDtoResponse> readAllBookingsBooker(long bookerId, BookingState state) {
-        Optional<User> booker = userRepository.findById(bookerId);
-        if (booker.isEmpty()) {
-            throw new NotFoundException("Пользователь с id: " + bookerId + " не найден или ещё не создан.");
-        }
+        ObjectHelper.findUserById(userRepository, bookerId);
 
         switch (state) {
             case CURRENT:
@@ -167,10 +129,8 @@ public class BookingServiceImpl implements BookingService {
     }
 
     public Collection<BookingDtoResponse> readAllBookingsOwner(long ownerId, BookingState state) {
-        Optional<User> owner = userRepository.findById(ownerId);
-        if (owner.isEmpty()) {
-            throw new NotFoundException("Пользователь с id: " + ownerId + " не найден или ещё не создан.");
-        }
+        ObjectHelper.findUserById(userRepository, ownerId);
+
         switch (state) {
             case CURRENT:
                 return bookingRepository.findAllBookingsOwnerCurrent(ownerId, LocalDateTime.now())
