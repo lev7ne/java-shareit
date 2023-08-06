@@ -9,6 +9,7 @@ import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
 import java.util.Collection;
+import java.util.List;
 
 @RestController
 @RequestMapping("/items")
@@ -44,7 +45,7 @@ public class ItemController {
     }
 
     @GetMapping
-    public Collection<ItemDtoResponse> getAll(@RequestHeader("X-Sharer-User-Id") long ownerId) {
+    public List<ItemDtoResponse> getAll(@RequestHeader("X-Sharer-User-Id") long ownerId) {
         return itemService.getAll(ownerId);
     }
 

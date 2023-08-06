@@ -5,6 +5,7 @@ import ru.practicum.shareit.item.dto.ItemDtoRequest;
 import ru.practicum.shareit.item.dto.ItemDtoResponse;
 
 import java.util.Collection;
+import java.util.List;
 
 
 public interface ItemService {
@@ -14,7 +15,7 @@ public interface ItemService {
 
     ItemDtoResponse find(long itemId, long userId);
 
-    Collection<ItemDtoResponse> getAll(long ownerId);
+    List<ItemDtoResponse> getAll(long ownerId);
 
     Collection<ItemDtoResponse> search(String text);
 

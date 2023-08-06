@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDtoRequest;
 import ru.practicum.shareit.booking.dto.BookingDtoResponse;
@@ -95,26 +96,27 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public Collection<BookingDtoResponse> readAllBookingsBooker(long bookerId, BookingState state) {
         ObjectHelper.findUserById(userRepository, bookerId);
+        Sort desc = Sort.by(Sort.Direction.DESC, "start");
 
         switch (state) {
             case CURRENT:
-                return bookingRepository.findAllBookingsBookerCurrent(bookerId, LocalDateTime.now())
+                return bookingRepository.findAllBookingsBookerCurrent(bookerId, LocalDateTime.now(), desc)
                         .stream()
                         .map(BookingDtoMapper::toBookingDtoResponse)
                         .collect(Collectors.toList());
             case PAST:
-                return bookingRepository.findAllBookingsBookerPast(bookerId, LocalDateTime.now())
+                return bookingRepository.findAllBookingsBookerPast(bookerId, LocalDateTime.now(), desc)
                         .stream()
                         .map(BookingDtoMapper::toBookingDtoResponse)
                         .collect(Collectors.toList());
             case FUTURE:
-                return bookingRepository.findAllBookingsBookerFuture(bookerId, LocalDateTime.now())
+                return bookingRepository.findAllBookingsBookerFuture(bookerId, LocalDateTime.now(), desc)
                         .stream()
                         .map(BookingDtoMapper::toBookingDtoResponse)
                         .collect(Collectors.toList());
             case WAITING:
             case REJECTED:
-                return bookingRepository.findAllBookingsByBookingStatusForBooker(bookerId, state.toString())
+                return bookingRepository.findAllBookingsByBookingStatusForBooker(bookerId, state.toString(), desc)
                         .stream()
                         .map(BookingDtoMapper::toBookingDtoResponse)
                         .collect(Collectors.toList());
@@ -130,31 +132,32 @@ public class BookingServiceImpl implements BookingService {
 
     public Collection<BookingDtoResponse> readAllBookingsOwner(long ownerId, BookingState state) {
         ObjectHelper.findUserById(userRepository, ownerId);
+        Sort desc = Sort.by(Sort.Direction.DESC, "start");
 
         switch (state) {
             case CURRENT:
-                return bookingRepository.findAllBookingsOwnerCurrent(ownerId, LocalDateTime.now())
+                return bookingRepository.findAllBookingsOwnerCurrent(ownerId, LocalDateTime.now(), desc)
                         .stream()
                         .map(BookingDtoMapper::toBookingDtoResponse)
                         .collect(Collectors.toList());
             case PAST:
-                return bookingRepository.findAllBookingsOwnerPast(ownerId, LocalDateTime.now())
+                return bookingRepository.findAllBookingsOwnerPast(ownerId, LocalDateTime.now(), desc)
                         .stream()
                         .map(BookingDtoMapper::toBookingDtoResponse)
                         .collect(Collectors.toList());
             case FUTURE:
-                return bookingRepository.findAllBookingsOwnerFuture(ownerId, LocalDateTime.now())
+                return bookingRepository.findAllBookingsOwnerFuture(ownerId, LocalDateTime.now(), desc)
                         .stream()
                         .map(BookingDtoMapper::toBookingDtoResponse)
                         .collect(Collectors.toList());
             case WAITING:
             case REJECTED:
-                return bookingRepository.findAllBookingsByBookingStatusForOwner(ownerId, state.toString())
+                return bookingRepository.findAllBookingsByBookingStatusForOwner(ownerId, state.toString(), desc)
                         .stream()
                         .map(BookingDtoMapper::toBookingDtoResponse)
                         .collect(Collectors.toList());
             case ALL:
-                return bookingRepository.findAllByOwnerId(ownerId)
+                return bookingRepository.findAllByOwnerId(ownerId, desc)
                         .stream()
                         .map(BookingDtoMapper::toBookingDtoResponse)
                         .collect(Collectors.toList());
