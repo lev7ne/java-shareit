@@ -2,6 +2,7 @@ package ru.practicum.shareit.user.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserDtoMapper;
 import ru.practicum.shareit.user.model.User;
@@ -22,16 +23,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserDto save(UserDto userDto) {
         return UserDtoMapper.toUserDto(userRepository.save(UserDtoMapper.toUser(userDto)));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserDto find(long id) {
         return UserDtoMapper.toUserDto(ObjectHelper.findUserById(userRepository, id));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Collection<UserDto> getAll() {
         return userRepository.findAll().stream()
                 .map(UserDtoMapper::toUserDto)
@@ -39,11 +43,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void delete(long id) {
         userRepository.deleteById(id);
     }
 
     @Override
+    @Transactional
     public UserDto update(long id, UserDto userDto) {
         User user = ObjectHelper.findUserById(userRepository, id);
 

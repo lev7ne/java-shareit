@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.mapper.BookingDtoMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
@@ -46,6 +47,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public ItemDtoResponse save(long ownerId, ItemDtoRequest itemDto) {
         User owner = ObjectHelper.findUserById(userRepository, ownerId);
 
@@ -56,6 +58,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public ItemDtoResponse update(long ownerId, ItemDtoRequest itemDto, long itemId) {
         Item updatedItem = ObjectHelper.findItemById(itemRepository, itemId);
 
@@ -77,6 +80,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ItemDtoResponse find(long itemId, long userId) {
         Item item = ObjectHelper.findItemById(itemRepository, itemId);
         List<CommentDto> comments = findComments(itemId);
@@ -109,8 +113,15 @@ public class ItemServiceImpl implements ItemService {
         return bookingsAfterNow.get(0);
     }
 
+    private List<CommentDto> findComments(long itemId) {
+        return commentRepository.findAllByItemId(itemId)
+                .stream()
+                .map(CommentDtoMapper::mapToCommentDto)
+                .collect(Collectors.toList());
+    }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ItemDtoResponse> getAll(long ownerId) {
         List<Item> itemsList = itemRepository.getItemsByOwner_Id(ownerId);
 
@@ -163,12 +174,14 @@ public class ItemServiceImpl implements ItemService {
                             lastBooking != null ? BookingDtoMapper.toBookingDtoResponseShort(lastBooking) : null,
                             nextBooking != null ? BookingDtoMapper.toBookingDtoResponseShort(nextBooking) : null,
                             commentDtos);
+
                 })
                 .sorted(Comparator.comparing(ItemDtoResponse::getId))
                 .collect(Collectors.toList());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Collection<ItemDtoResponse> search(String text) {
         if (text == null || text.isBlank()) {
             return new ArrayList<>();
@@ -179,6 +192,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public CommentDto saveComment(long bookerId, CommentDto commentDto, long itemId) {
         User booker = ObjectHelper.findUserById(userRepository, bookerId);
 
@@ -207,12 +221,5 @@ public class ItemServiceImpl implements ItemService {
         Comment comment = CommentDtoMapper.mapToComment(commentDto, item, booker);
 
         return CommentDtoMapper.mapToCommentDto(commentRepository.save(comment));
-    }
-
-    private List<CommentDto> findComments(long itemId) {
-        return commentRepository.findAllByItemId(itemId)
-                .stream()
-                .map(CommentDtoMapper::mapToCommentDto)
-                .collect(Collectors.toList());
     }
 }

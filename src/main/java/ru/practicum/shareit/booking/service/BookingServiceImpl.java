@@ -3,6 +3,7 @@ package ru.practicum.shareit.booking.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDtoRequest;
 import ru.practicum.shareit.booking.dto.BookingDtoResponse;
 import ru.practicum.shareit.booking.mapper.BookingDtoMapper;
@@ -42,6 +43,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional
     public BookingDtoResponse add(long bookerId, BookingDtoRequest bookingDtoRequest) {
         User booker = ObjectHelper.findUserById(userRepository, bookerId);
         Item item = ObjectHelper.findItemById(itemRepository, bookingDtoRequest.getItemId());
@@ -61,6 +63,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional
     public BookingDtoResponse update(long ownerId, long bookingId, boolean approved) {
         Booking booking = ObjectHelper.findBookingById(bookingRepository, bookingId);
 
@@ -82,6 +85,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public BookingDtoResponse find(long userId, long bookingId) {
         ObjectHelper.findUserById(userRepository, userId);
         Booking booking = ObjectHelper.findBookingById(bookingRepository, bookingId);
@@ -94,6 +98,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Collection<BookingDtoResponse> readAllBookingsBooker(long bookerId, BookingState state) {
         ObjectHelper.findUserById(userRepository, bookerId);
         Sort desc = Sort.by(Sort.Direction.DESC, "start");
@@ -130,6 +135,8 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
+    @Override
+    @Transactional(readOnly = true)
     public Collection<BookingDtoResponse> readAllBookingsOwner(long ownerId, BookingState state) {
         ObjectHelper.findUserById(userRepository, ownerId);
         Sort desc = Sort.by(Sort.Direction.DESC, "start");
