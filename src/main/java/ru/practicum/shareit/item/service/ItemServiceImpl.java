@@ -148,13 +148,11 @@ public class ItemServiceImpl implements ItemService {
                     Booking nextBooking = null;
                     if (bookings != null) {
                         lastBooking = bookings.stream()
-                                .filter(booking -> booking.getItem().getId() == item.getId())
                                 .filter(booking -> booking.getStart().isBefore(LocalDateTime.now()))
                                 .max(Comparator.comparing(Booking::getEnd))
                                 .orElse(null);
 
                         nextBooking = bookings.stream()
-                                .filter(booking -> booking.getItem().getId() == item.getId())
                                 .filter(booking -> booking.getStart().isAfter(LocalDateTime.now()))
                                 .min(Comparator.comparing(Booking::getStart))
                                 .orElse(null);
@@ -165,7 +163,6 @@ public class ItemServiceImpl implements ItemService {
                     List<CommentDto> commentDtos = null;
                     if (comments != null) {
                         commentDtos = comments.stream()
-                                .filter(comment -> comment.getItem().getId() == item.getId())
                                 .map(CommentDtoMapper::mapToCommentDto)
                                 .collect(Collectors.toList());
                     }
@@ -196,17 +193,13 @@ public class ItemServiceImpl implements ItemService {
     public CommentDto saveComment(long bookerId, CommentDto commentDto, long itemId) {
         User booker = ObjectHelper.findUserById(userRepository, bookerId);
 
-        Collection<Booking> itemBookings = bookingRepository.findAllByItem_Id(itemId)
-                .stream()
-                .filter(booking -> booking.getBooker().getId() == bookerId)
-                .filter(booking -> booking.getBookingStatus() == APPROVED)
-                .collect(Collectors.toList());
+        List<Booking> itemBookings = new ArrayList<>(bookingRepository.findAllByItem_IdAndBooker_IdAndBookingStatus(itemId, bookerId, APPROVED));
 
         if (itemBookings.isEmpty()) {
             throw new UnavailableException("Пользователь с id: " + bookerId + " не бронировал вещь с id: " + itemId);
         }
 
-        Collection<Booking> pastOrPresentBookings = itemBookings.stream()
+        List<Booking> pastOrPresentBookings = itemBookings.stream()
                 .filter(booking -> booking.getStart().isBefore(LocalDateTime.now()))
                 .collect(Collectors.toList());
 

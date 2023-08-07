@@ -25,8 +25,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.booking.model.BookingStatus.APPROVED;
-import static ru.practicum.shareit.booking.model.BookingStatus.REJECTED;
+import static ru.practicum.shareit.booking.model.BookingStatus.*;
 
 
 @Service
@@ -67,8 +66,8 @@ public class BookingServiceImpl implements BookingService {
     public BookingDtoResponse update(long ownerId, long bookingId, boolean approved) {
         Booking booking = ObjectHelper.findBookingById(bookingRepository, bookingId);
 
-        if (booking.getBookingStatus().equals(APPROVED) && approved) {
-            throw new UnavailableException("Бронирование подтверждено ранее.");
+        if (booking.getBookingStatus() != WAITING) {
+            throw new UnavailableException("Запрос на бронирование уже был обработан ранее.");
         }
         if (booking.getItem().getOwner().getId() != ownerId) {
             throw new AccessDeniedException("Только владелец вещи может работать с запросом.");

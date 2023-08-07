@@ -64,6 +64,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     Collection<Booking> findAllByItem_Id(long id);
 
+    List<Booking> findAllByItem_IdAndBooker_IdAndBookingStatus(long itemId, long bookerIds, BookingStatus bookingStatus);
+
     @Query("select b from Booking b " +
             "where b.item.id in ?1 " +
             "and upper(b.bookingStatus) = upper(?2) ")
