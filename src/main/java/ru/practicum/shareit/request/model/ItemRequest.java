@@ -5,14 +5,21 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.user.model.User;
 
-import java.time.LocalDate;
+import javax.persistence.*;
 
+@Entity
+@Table(name = "requests")
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class ItemRequest {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     long id;
+    @Column(name = "description")
     String description;
-    User requestor;
-    LocalDate created;
+    @ManyToOne
+    @JoinColumn(name = "requester_id", referencedColumnName = "id")
+    User requester;
 }
