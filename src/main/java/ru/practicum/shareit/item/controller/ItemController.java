@@ -34,7 +34,7 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public Collection<ItemDtoResponse> search(@RequestParam("text") String text) {
+    public Collection<ItemDtoResponse> searchItem(@RequestParam("text") String text) {
         return itemService.search(text);
     }
 
@@ -49,9 +49,17 @@ public class ItemController {
         return itemService.getAll(ownerId);
     }
 
+    @GetMapping("/all")
+    public List<ItemDtoResponse> getAll(@RequestHeader("X-Sharer-User-Id")
+                                        @RequestParam String anyParam,
+                                        long ownerId) {
+        return itemService.getAll(ownerId);
+    }
+
     @PostMapping("/{itemId}/comment")
     public CommentDto createComment(@RequestHeader("X-Sharer-User-Id") long bookerId,
-                                    @Valid @RequestBody CommentDto commentDto, @PathVariable long itemId) {
+                                    @Valid @RequestBody CommentDto commentDto,
+                                    @PathVariable long itemId) {
         return itemService.saveComment(bookerId, commentDto, itemId);
     }
 }

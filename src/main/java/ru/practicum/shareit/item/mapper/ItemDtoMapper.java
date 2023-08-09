@@ -28,7 +28,8 @@ public class ItemDtoMapper {
                 item.getAvailable(),
                 null,
                 null,
-                null
+                null,
+                item.getItemRequest() != null ? item.getItemRequest().getId() : null
         );
     }
 
@@ -40,7 +41,18 @@ public class ItemDtoMapper {
                 item.getAvailable(),
                 lastBooking,
                 nextBooking,
-                comments
+                comments,
+                item.getItemRequest() != null ? item.getItemRequest().getId() : null
+        );
+    }
+
+    public ItemDtoResponse toItemDtoResponseRequest(Item item) {
+        return new ItemDtoResponse(
+                item.getId(),
+                item.getName(),
+                item.getDescription(),
+                item.getAvailable(),
+                item.getOwner().getId()
         );
     }
 

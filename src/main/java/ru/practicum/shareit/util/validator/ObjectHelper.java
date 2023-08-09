@@ -5,6 +5,8 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.util.exception.ObjectNotFoundException;
@@ -24,5 +26,10 @@ public class ObjectHelper {
     public Booking findBookingById(BookingRepository bookingRepository, long id) {
         return bookingRepository.findById(id).orElseThrow(() ->
                 new ObjectNotFoundException("Бронирование id: " + id + " не найдено или ещё не создано."));
+    }
+
+    public ItemRequest findItemRequestById(ItemRequestRepository itemRequestRepository, long id) {
+        return itemRequestRepository.findById(id).orElseThrow(() ->
+                new ObjectNotFoundException("Запрос id: " + id + " не найден или ещё не создан."));
     }
 }

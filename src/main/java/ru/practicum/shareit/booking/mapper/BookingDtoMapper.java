@@ -40,7 +40,7 @@ public class BookingDtoMapper {
                 booking.getEnd(),
                 booking.getBookingStatus(),
                 new UserDto(booking.getBooker().getId(), null, null),
-                new ItemDtoRequest(booking.getItem().getId(), booking.getItem().getName(), null, null)
+                new ItemDtoRequest(booking.getItem().getId(), booking.getItem().getName(), null, null, 0)
         );
     }
 }

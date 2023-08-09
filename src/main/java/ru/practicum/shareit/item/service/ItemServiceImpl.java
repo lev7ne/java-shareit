@@ -17,6 +17,8 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.util.exception.AccessDeniedException;
@@ -37,22 +39,33 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final ItemRequestRepository itemRequestRepository;
 
     @Autowired
-    public ItemServiceImpl(ItemRepository itemRepository, UserRepository userRepository, BookingRepository bookingRepository, CommentRepository commentRepository) {
+    public ItemServiceImpl(ItemRepository itemRepository, UserRepository userRepository, BookingRepository bookingRepository, CommentRepository commentRepository, ItemRequestRepository itemRequestRepository) {
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
         this.bookingRepository = bookingRepository;
         this.commentRepository = commentRepository;
+        this.itemRequestRepository = itemRequestRepository;
     }
 
     @Override
     @Transactional
-    public ItemDtoResponse save(long ownerId, ItemDtoRequest itemDto) {
+    public ItemDtoResponse save(long ownerId, ItemDtoRequest itemDtoRequest) {
         User owner = ObjectHelper.findUserById(userRepository, ownerId);
 
-        Item item = ItemDtoMapper.mapToItem(itemDto);
+        Item item = ItemDtoMapper.mapToItem(itemDtoRequest);
         item.setOwner(owner);
+
+        long requestId = itemDtoRequest.getRequestId();
+        if (requestId > 0) {
+            ItemRequest itemRequest = ObjectHelper.findItemRequestById(itemRequestRepository, requestId);
+            if (itemRequest.getRequester().getId() == ownerId) {
+                throw new UnavailableException("Пользователь не может создать вещь в ответ на свой запрос.");
+            }
+            item.setItemRequest(itemRequest);
+        }
 
         return ItemDtoMapper.mapToItemDtoResponse(itemRepository.save(item));
     }
