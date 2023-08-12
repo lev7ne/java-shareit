@@ -1,9 +1,10 @@
 package ru.practicum.shareit.request.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.dto.ItemDtoResponse;
 import ru.practicum.shareit.item.mapper.ItemDtoMapper;
 import ru.practicum.shareit.item.model.Item;
@@ -47,7 +48,17 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     @Transactional(readOnly = true)
-    public ItemRequestDtoResponse find(long userId, long requestId) {
+    public List<ItemRequestDtoResponse> findByRequesterId(long requesterId) {
+
+        ObjectHelper.findUserById(userRepository, requesterId);
+        List<ItemRequest> itemRequestList = itemRequestRepository.findAllByRequesterId(requesterId);
+
+        return findAllItemsForItemRequestDtoResponse(itemRequestList);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ItemRequestDtoResponse findRequestByUserIdAndRequestId(long userId, long requestId) {
         ObjectHelper.findUserById(userRepository, userId);
 
         ItemRequest itemRequest = ObjectHelper.findItemRequestById(itemRequestRepository, requestId);
@@ -61,15 +72,23 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
         ItemRequestDtoResponse itemRequestDtoResponse = ItemRequestDtoMapper.toItemRequestDtoResponse(itemRequest);
         itemRequestDtoResponse.setItems(itemDtoResponseList);
-        
+
         return itemRequestDtoResponse;
     }
 
+
     @Override
     @Transactional(readOnly = true)
-    public List<ItemRequestDtoResponse> findAllByUserId(long requesterId) {
+    public List<ItemRequestDtoResponse> findAllByRequesterId(long requesterId, Integer from, Integer size) {
+        Pageable page = ObjectHelper.getPageRequest(from, size);
+
         ObjectHelper.findUserById(userRepository, requesterId);
-        List<ItemRequest> itemRequestList = itemRequestRepository.findAllByRequester_Id(requesterId);
+        List<ItemRequest> itemRequestList = itemRequestRepository.findAllByRequesterId(requesterId, page);
+
+        return findAllItemsForItemRequestDtoResponse(itemRequestList);
+    }
+
+    private List<ItemRequestDtoResponse> findAllItemsForItemRequestDtoResponse(List<ItemRequest> itemRequestList) {
 
         if (itemRequestList.isEmpty()) {
             return new ArrayList<>();
@@ -90,10 +109,9 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
         itemRequestDtoResponseList.forEach(itemRequestDtoResponse ->
                 itemRequestDtoResponse.setItems(itemDtoResponseMap.getOrDefault(itemRequestDtoResponse.getId(), new ArrayList<>()).stream()
-                .map(ItemDtoMapper::mapToItemDtoResponse)
-                .collect(Collectors.toList())));
+                        .map(ItemDtoMapper::mapToItemDtoResponse)
+                        .collect(Collectors.toList())));
 
         return itemRequestDtoResponseList;
     }
-
 }

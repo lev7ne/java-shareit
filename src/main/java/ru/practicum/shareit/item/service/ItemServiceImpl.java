@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +27,10 @@ import ru.practicum.shareit.util.exception.UnavailableException;
 import ru.practicum.shareit.util.validator.ObjectHelper;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.booking.model.BookingStatus.APPROVED;
@@ -135,8 +139,9 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemDtoResponse> getAll(long ownerId) {
-        List<Item> itemsList = itemRepository.getItemsByOwner_Id(ownerId);
+    public List<ItemDtoResponse> getAll(long ownerId, Integer from, Integer size) {
+        PageRequest page = ObjectHelper.getPageRequest(from, size);
+        List<Item> itemsList = itemRepository.getItemsByOwner_Id(ownerId, page);
 
         List<Long> itemIdsList = itemsList.stream()
                 .map(Item::getId)
@@ -192,11 +197,12 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public Collection<ItemDtoResponse> search(String text) {
+    public List<ItemDtoResponse> search(String text, int from, int size) {
         if (text == null || text.isBlank()) {
             return new ArrayList<>();
         }
-        return itemRepository.search(text).stream()
+        PageRequest page = ObjectHelper.getPageRequest(from, size);
+        return itemRepository.search(text, page).stream()
                 .map(ItemDtoMapper::mapToItemDtoResponse)
                 .collect(Collectors.toList());
     }

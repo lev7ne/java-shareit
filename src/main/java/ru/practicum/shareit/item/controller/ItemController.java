@@ -8,7 +8,8 @@ import ru.practicum.shareit.item.dto.ItemDtoResponse;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
-import java.util.Collection;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
@@ -34,8 +35,10 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public Collection<ItemDtoResponse> searchItem(@RequestParam("text") String text) {
-        return itemService.search(text);
+    public List<ItemDtoResponse> searchItem(@RequestParam("text") String text,
+                                            @RequestParam(defaultValue = "0") int from,
+                                            @RequestParam(defaultValue = "10") int size) {
+        return itemService.search(text, from, size);
     }
 
     @GetMapping("/{id}")
@@ -45,15 +48,10 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDtoResponse> getAll(@RequestHeader("X-Sharer-User-Id") long ownerId) {
-        return itemService.getAll(ownerId);
-    }
-
-    @GetMapping("/all")
-    public List<ItemDtoResponse> getAll(@RequestHeader("X-Sharer-User-Id")
-                                        @RequestParam String anyParam,
-                                        long ownerId) {
-        return itemService.getAll(ownerId);
+    public List<ItemDtoResponse> getAllItems(@RequestHeader("X-Sharer-User-Id") long ownerId,
+                                             @RequestParam(defaultValue = "0") int from,
+                                             @RequestParam(defaultValue = "10") int size) {
+        return itemService.getAll(ownerId, from, size);
     }
 
     @PostMapping("/{itemId}/comment")
