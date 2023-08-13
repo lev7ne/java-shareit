@@ -8,8 +8,8 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class ItemDtoRequest {
     private long id;
     @NotBlank(message = "Название вещи не может быть пустым.")
@@ -19,4 +19,17 @@ public class ItemDtoRequest {
     @NotNull
     private Boolean available;
     private long requestId;
+
+    public ItemDtoRequest(String name, String description, Boolean available, long requestId) {
+        this.name = name;
+        this.description = description;
+        this.available = available;
+        this.requestId = requestId;
+    }
+
+    public ItemDtoRequest(String name, String description, Boolean available) {
+        this.name = name;
+        this.description = description;
+        this.available = available;
+    }
 }

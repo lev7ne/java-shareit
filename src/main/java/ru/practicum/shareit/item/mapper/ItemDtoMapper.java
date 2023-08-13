@@ -46,14 +46,14 @@ public class ItemDtoMapper {
         );
     }
 
-    public ItemDtoResponse toItemDtoResponseRequest(Item item) {
-        return new ItemDtoResponse(
-                item.getId(),
-                item.getName(),
-                item.getDescription(),
-                item.getAvailable(),
-                item.getOwner().getId()
-        );
-    }
+//    public ItemDtoResponse toItemDtoResponseRequest(Item item) {
+//        return new ItemDtoResponse(
+//                item.getId(),
+//                item.getName(),
+//                item.getDescription(),
+//                item.getAvailable(),
+//                item.getOwner().getId()
+//        );
+//    }
 
 }

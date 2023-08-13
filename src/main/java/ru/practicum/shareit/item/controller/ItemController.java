@@ -8,8 +8,6 @@ import ru.practicum.shareit.item.dto.ItemDtoResponse;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
@@ -24,14 +22,14 @@ public class ItemController {
 
     @PostMapping
     public ItemDtoResponse createItem(@RequestHeader("X-Sharer-User-Id") long ownerId,
-                                      @Valid @RequestBody ItemDtoRequest itemDto) {
-        return itemService.save(ownerId, itemDto);
+                                      @Valid @RequestBody ItemDtoRequest itemDtoRequest) {
+        return itemService.save(ownerId, itemDtoRequest);
     }
 
     @PatchMapping("/{id}")
     public ItemDtoResponse updateItem(@RequestHeader("X-Sharer-User-Id") long ownerId,
-                                      @RequestBody ItemDtoRequest itemDto, @PathVariable("id") long itemId) {
-        return itemService.update(ownerId, itemDto, itemId);
+                                      @RequestBody ItemDtoRequest itemDtoRequest, @PathVariable("id") long itemId) {
+        return itemService.update(ownerId, itemDtoRequest, itemId);
     }
 
     @GetMapping("/search")

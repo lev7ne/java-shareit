@@ -7,8 +7,6 @@ import ru.practicum.shareit.request.dto.ItemRequestDtoResponse;
 import ru.practicum.shareit.request.service.ItemRequestService;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
@@ -37,7 +35,6 @@ public class ItemRequestController {
                                                                   @PathVariable long requestId) {
         return itemRequestService.findRequestByUserIdAndRequestId(userId, requestId);
     }
-
 
     @GetMapping("/all")
     public List<ItemRequestDtoResponse> getRequests(@RequestHeader("X-Sharer-User-Id") long requesterId,

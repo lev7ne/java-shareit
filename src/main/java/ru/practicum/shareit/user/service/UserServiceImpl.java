@@ -9,7 +9,7 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.util.validator.ObjectHelper;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,7 +36,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public Collection<UserDto> getAll() {
+    public List<UserDto> getAll() {
         return userRepository.findAll().stream()
                 .map(UserDtoMapper::toUserDto)
                 .collect(Collectors.toList());
@@ -45,6 +45,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void delete(long id) {
+        ObjectHelper.findUserById(userRepository, id);
         userRepository.deleteById(id);
     }
 
