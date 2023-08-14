@@ -77,6 +77,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public ItemDtoResponse update(long ownerId, ItemDtoRequest itemDto, long itemId) {
+        ObjectHelper.findUserById(userRepository, ownerId);
         Item updatedItem = ObjectHelper.findItemById(itemRepository, itemId);
 
         if (updatedItem.getOwner().getId() != ownerId) {
@@ -99,6 +100,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional(readOnly = true)
     public ItemDtoResponse find(long itemId, long userId) {
+        ObjectHelper.findUserById(userRepository, userId);
         Item item = ObjectHelper.findItemById(itemRepository, itemId);
         List<CommentDto> comments = findComments(itemId);
 
@@ -140,6 +142,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional(readOnly = true)
     public List<ItemDtoResponse> getAll(long ownerId, Integer from, Integer size) {
+        ObjectHelper.findUserById(userRepository, ownerId);
         PageRequest page = ObjectHelper.getPageRequest(from, size);
         List<Item> itemsList = itemRepository.getItemsByOwner_Id(ownerId, page);
 
@@ -211,6 +214,7 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     public CommentDto saveComment(long bookerId, CommentDto commentDto, long itemId) {
         User booker = ObjectHelper.findUserById(userRepository, bookerId);
+        Item item = ObjectHelper.findItemById(itemRepository, itemId);
 
         List<Booking> itemBookings = new ArrayList<>(bookingRepository.findAllByItem_IdAndBooker_IdAndBookingStatus(itemId, bookerId, APPROVED));
 
@@ -226,7 +230,6 @@ public class ItemServiceImpl implements ItemService {
             throw new UnavailableException("Отзыв можно оставить только после состоявшегося бронирования.");
         }
 
-        Item item = ObjectHelper.findItemById(itemRepository, itemId);
 
         commentDto.setCreated(LocalDateTime.now());
 
