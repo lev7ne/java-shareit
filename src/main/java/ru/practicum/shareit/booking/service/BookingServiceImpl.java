@@ -48,7 +48,6 @@ public class BookingServiceImpl implements BookingService {
         User booker = ObjectHelper.findUserById(userRepository, bookerId);
         Item item = ObjectHelper.findItemById(itemRepository, bookingDtoRequest.getItemId());
 
-
         if (booker.getId() == item.getOwner().getId()) {
             throw new ObjectNotFoundException("Нельзя забронировать свой предмет.");
         }
@@ -65,6 +64,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingDtoResponse update(long ownerId, long bookingId, boolean approved) {
+        ObjectHelper.findUserById(userRepository, ownerId);
         Booking booking = ObjectHelper.findBookingById(bookingRepository, bookingId);
 
         if (booking.getBookingStatus() != WAITING) {
@@ -76,8 +76,6 @@ public class BookingServiceImpl implements BookingService {
         if (!booking.getItem().getAvailable()) {
             throw new UnavailableException(booking.getItem().getName() + " забронирован ранее.");
         }
-
-        ObjectHelper.findUserById(userRepository, ownerId);
 
         booking.setBookingStatus(approved ? APPROVED : REJECTED);
 

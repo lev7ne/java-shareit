@@ -12,6 +12,7 @@ import org.springframework.data.domain.Sort;
 import ru.practicum.shareit.booking.dto.BookingDtoRequest;
 import ru.practicum.shareit.booking.dto.BookingDtoResponse;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.dto.ItemDtoRequest;
 import ru.practicum.shareit.item.model.Item;
@@ -21,6 +22,7 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.util.exception.AccessDeniedException;
 import ru.practicum.shareit.util.exception.ObjectNotFoundException;
 import ru.practicum.shareit.util.exception.UnavailableException;
+import ru.practicum.shareit.util.exception.UnavailableStateException;
 import ru.practicum.shareit.util.validator.ObjectHelper;
 
 import java.time.LocalDateTime;
@@ -34,6 +36,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static ru.practicum.shareit.booking.model.BookingState.ALL;
+import static ru.practicum.shareit.booking.model.BookingStatus.APPROVED;
 import static ru.practicum.shareit.booking.model.BookingStatus.WAITING;
 
 @ExtendWith(MockitoExtension.class)
@@ -74,6 +77,7 @@ class BookingServiceImplTest {
         LocalDateTime end = LocalDateTime.of(2023, 8, 21, 10, 0);
 
         testBookingDtoRequest1 = new BookingDtoRequest(start, end, 1);
+
         testBooking1 = new Booking(start, end, testItem1, testUser2, WAITING);
         testBooking2 = new Booking(start, end, testItem1, testUser2, WAITING);
 
@@ -139,6 +143,67 @@ class BookingServiceImplTest {
 
         assertEquals(testItem1.getName() + " - забронирован другим пользователем.",
                 unavailableException.getMessage());
+    }
+
+    @Test
+    void update_whenUserNotFound_thanThrowObjectNotFoundException() {
+        when(mockUserRepository.findById(1L)).thenReturn(Optional.empty());
+
+        ObjectNotFoundException objectNotFoundException = assertThrows(ObjectNotFoundException.class,
+                () -> bookingService.update(1, 2, true));
+
+        assertEquals("Пользователь id: " + 1 + " не найден или ещё не создан.", objectNotFoundException.getMessage());
+    }
+
+    @Test
+    void update_whenBookingStatusApproved_thanThrowUnavailableException() {
+        testBooking1.setBookingStatus(APPROVED);
+
+        when(mockUserRepository.findById(1L)).thenReturn(Optional.of(testUser1));
+        when(mockBookingRepository.findById(1L)).thenReturn(Optional.of(testBooking1));
+
+        UnavailableException unavailableException = assertThrows(UnavailableException.class,
+                () -> bookingService.update(1, 1, true));
+
+        assertEquals("Запрос на бронирование уже был обработан ранее.", unavailableException.getMessage());
+    }
+
+    @Test
+    void update_whenBookingAvailableFalse_thanThrowUnavailableException() {
+        testBooking1.getItem().setAvailable(false);
+
+        when(mockUserRepository.findById(1L)).thenReturn(Optional.of(testUser1));
+        when(mockBookingRepository.findById(1L)).thenReturn(Optional.of(testBooking1));
+
+        UnavailableException unavailableException = assertThrows(UnavailableException.class,
+                () -> bookingService.update(1, 1, true));
+
+        assertEquals(testBooking1.getItem().getName() + " забронирован ранее.", unavailableException.getMessage());
+    }
+
+    @Test
+    void update_whenBookingNotFound_thanThrowObjectNotFoundException() {
+        when(mockUserRepository.findById(2L)).thenReturn(Optional.of(testUser2));
+        when(mockBookingRepository.findById(1L)).thenReturn(Optional.empty());
+
+        ObjectNotFoundException objectNotFoundException = assertThrows(ObjectNotFoundException.class,
+                () -> bookingService.update(2, 1, true));
+
+        assertEquals("Бронирование id: " + 1 + " не найдено или ещё не создано.", objectNotFoundException.getMessage());
+    }
+
+    @Test
+    void update_whenBookingAvailable_thenApprovedBooking() {
+        when(mockUserRepository.findById(1L)).thenReturn(Optional.of(testUser1));
+        when(mockBookingRepository.findById(1L)).thenReturn(Optional.of(testBooking1));
+
+        testBooking2.setBookingStatus(APPROVED);
+
+        when(mockBookingRepository.save(Mockito.any())).thenReturn(testBooking2);
+
+        BookingDtoResponse updatedBooking = bookingService.update(1, 1, true);
+
+        assertEquals(testBooking2.getBookingStatus(), updatedBooking.getStatus());
     }
 
     @Test
@@ -211,5 +276,24 @@ class BookingServiceImplTest {
 
         assertEquals(2, returnedBookingsList.size());
     }
+
+    @Test
+    void readAllBookingsBooker_whenIncorrectState_thenReturnAllBookings() {
+
+        UnavailableStateException unavailableStateException = assertThrows(UnavailableStateException.class,
+                () -> bookingService.readAllBookingsBooker(1, BookingState.getBookingState("INCORRECT"), 0, 10));
+
+        assertEquals("Unknown state: INCORRECT", unavailableStateException.getMessage());
+    }
+
+    @Test
+    void readAllBookingsOwner_whenIncorrectState_thenReturnAllBookings() {
+
+        UnavailableStateException unavailableStateException = assertThrows(UnavailableStateException.class,
+                () -> bookingService.readAllBookingsBooker(1, BookingState.getBookingState("INCORRECT"), 0, 10));
+
+        assertEquals("Unknown state: INCORRECT", unavailableStateException.getMessage());
+    }
+
 
 }

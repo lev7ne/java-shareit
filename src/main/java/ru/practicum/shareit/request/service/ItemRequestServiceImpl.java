@@ -79,9 +79,9 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     @Transactional(readOnly = true)
     public List<ItemRequestDtoResponse> findAllByRequesterId(long requesterId, Integer from, Integer size) {
+        ObjectHelper.findUserById(userRepository, requesterId);
         Pageable page = ObjectHelper.getPageRequest(from, size);
 
-        ObjectHelper.findUserById(userRepository, requesterId);
         List<ItemRequest> itemRequestList = itemRequestRepository.findAllByRequesterId(requesterId, page);
 
         return findAllItemsForItemRequestDtoResponse(itemRequestList);
