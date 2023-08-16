@@ -41,7 +41,6 @@ import static ru.practicum.shareit.booking.model.BookingStatus.WAITING;
 
 @ExtendWith(MockitoExtension.class)
 class BookingServiceImplTest {
-
     @Mock
     private BookingRepository mockBookingRepository;
     @Mock
@@ -281,7 +280,7 @@ class BookingServiceImplTest {
     void readAllBookingsBooker_whenIncorrectState_thenReturnAllBookings() {
 
         UnavailableStateException unavailableStateException = assertThrows(UnavailableStateException.class,
-                () -> bookingService.readAllBookingsBooker(1, BookingState.getBookingState("INCORRECT"), 0, 10));
+                () -> bookingService.readAllBookingsBooker(1, BookingState.valueOf("INCORRECT"), 0, 10));
 
         assertEquals("Unknown state: INCORRECT", unavailableStateException.getMessage());
     }
@@ -290,7 +289,7 @@ class BookingServiceImplTest {
     void readAllBookingsOwner_whenIncorrectState_thenReturnAllBookings() {
 
         UnavailableStateException unavailableStateException = assertThrows(UnavailableStateException.class,
-                () -> bookingService.readAllBookingsBooker(1, BookingState.getBookingState("INCORRECT"), 0, 10));
+                () -> bookingService.readAllBookingsBooker(1, BookingState.valueOf("INCORRECT"), 0, 10));
 
         assertEquals("Unknown state: INCORRECT", unavailableStateException.getMessage());
     }
