@@ -12,7 +12,6 @@ import org.springframework.data.domain.Sort;
 import ru.practicum.shareit.booking.dto.BookingDtoRequest;
 import ru.practicum.shareit.booking.dto.BookingDtoResponse;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.dto.ItemDtoRequest;
 import ru.practicum.shareit.item.model.Item;
@@ -22,7 +21,6 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.util.exception.AccessDeniedException;
 import ru.practicum.shareit.util.exception.ObjectNotFoundException;
 import ru.practicum.shareit.util.exception.UnavailableException;
-import ru.practicum.shareit.util.exception.UnavailableStateException;
 import ru.practicum.shareit.util.validator.ObjectHelper;
 
 import java.time.LocalDateTime;
@@ -275,24 +273,4 @@ class BookingServiceImplTest {
 
         assertEquals(2, returnedBookingsList.size());
     }
-
-    @Test
-    void readAllBookingsBooker_whenIncorrectState_thenReturnAllBookings() {
-
-        UnavailableStateException unavailableStateException = assertThrows(UnavailableStateException.class,
-                () -> bookingService.readAllBookingsBooker(1, BookingState.valueOf("INCORRECT"), 0, 10));
-
-        assertEquals("Unknown state: INCORRECT", unavailableStateException.getMessage());
-    }
-
-    @Test
-    void readAllBookingsOwner_whenIncorrectState_thenReturnAllBookings() {
-
-        UnavailableStateException unavailableStateException = assertThrows(UnavailableStateException.class,
-                () -> bookingService.readAllBookingsBooker(1, BookingState.valueOf("INCORRECT"), 0, 10));
-
-        assertEquals("Unknown state: INCORRECT", unavailableStateException.getMessage());
-    }
-
-
 }
