@@ -95,7 +95,7 @@ class ItemRequestServiceImplTest {
 
         UnavailableException unavailableException = assertThrows(UnavailableException.class,
                 () -> itemRequestService.findAllByRequesterId(1, -1, -1));
-        assertEquals("Некорректное значение from или size.", unavailableException.getMessage());
+        assertEquals("Некорректное значение from:" + (-1) + " или size:" + (-1) + ".", unavailableException.getMessage());
     }
 
     @Test

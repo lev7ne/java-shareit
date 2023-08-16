@@ -45,15 +45,4 @@ public class ItemDtoMapper {
                 item.getItemRequest() != null ? item.getItemRequest().getId() : null
         );
     }
-
-//    public ItemDtoResponse toItemDtoResponseRequest(Item item) {
-//        return new ItemDtoResponse(
-//                item.getId(),
-//                item.getName(),
-//                item.getDescription(),
-//                item.getAvailable(),
-//                item.getOwner().getId()
-//        );
-//    }
-
 }

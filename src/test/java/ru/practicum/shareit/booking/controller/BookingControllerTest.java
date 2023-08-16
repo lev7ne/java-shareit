@@ -30,7 +30,6 @@ import static ru.practicum.shareit.booking.model.BookingStatus.APPROVED;
 
 @WebMvcTest(controllers = BookingController.class)
 class BookingControllerTest {
-
     @MockBean
     private BookingService mockBookingService;
 

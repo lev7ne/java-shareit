@@ -40,7 +40,7 @@ public class ObjectHelper {
             int page = from / size;
             return PageRequest.of(page, size);
         } else {
-            throw new UnavailableException("Некорректное значение from или size.");
+            throw new UnavailableException("Некорректное значение from:" + from + " или size:" + size + ".");
         }
     }
 }
