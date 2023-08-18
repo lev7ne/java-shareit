@@ -7,7 +7,7 @@ import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.service.BookingService;
 
 import javax.validation.Valid;
-import java.util.Collection;
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "/bookings")
@@ -38,16 +38,18 @@ public class BookingController {
     }
 
     @GetMapping
-    public Collection<BookingDtoResponse> readAllBookerBookings(@RequestHeader("X-Sharer-User-Id") long userId,
-                                                                @RequestParam(defaultValue = "ALL") String state) {
-        BookingState validState = BookingState.getBookingState(state);
-        return bookingService.readAllBookingsBooker(userId, validState);
+    public List<BookingDtoResponse> readAllBookerBookings(@RequestHeader("X-Sharer-User-Id") long userId,
+                                                          @RequestParam(defaultValue = "ALL") BookingState state,
+                                                          @RequestParam(defaultValue = "0") int from,
+                                                          @RequestParam(defaultValue = "10") int size) {
+        return bookingService.readAllBookingsBooker(userId, state, from, size);
     }
 
     @GetMapping("/owner")
-    public Collection<BookingDtoResponse> readAllBookingItem(@RequestHeader("X-Sharer-User-Id") long ownerId,
-                                                             @RequestParam(defaultValue = "ALL") String state) {
-        BookingState validState = BookingState.getBookingState(state);
-        return bookingService.readAllBookingsOwner(ownerId, validState);
+    public List<BookingDtoResponse> readAllOwnerBooking(@RequestHeader("X-Sharer-User-Id") long ownerId,
+                                                        @RequestParam(defaultValue = "ALL") BookingState state,
+                                                        @RequestParam(defaultValue = "0") int from,
+                                                        @RequestParam(defaultValue = "10") int size) {
+        return bookingService.readAllBookingsOwner(ownerId, state, from, size);
     }
 }

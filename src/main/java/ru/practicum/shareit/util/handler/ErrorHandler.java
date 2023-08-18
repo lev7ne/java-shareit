@@ -5,13 +5,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.util.exception.AccessDeniedException;
 import ru.practicum.shareit.util.exception.ObjectNotFoundException;
 import ru.practicum.shareit.util.exception.UnavailableException;
-import ru.practicum.shareit.util.exception.UnavailableStateException;
 import ru.practicum.shareit.util.model.Violation;
 
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 @RestControllerAdvice
@@ -30,9 +32,15 @@ public class ErrorHandler {
         return Map.of("BAD_REQUEST", HttpStatus.BAD_REQUEST.value());
     }
 
-    @ExceptionHandler(UnavailableStateException.class)
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Violation handleAnyException(Throwable e) {
-        return new Violation(e.getMessage());
+    public Violation handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
+        log.warn(e.getMessage(), e);
+
+        String msg = (Objects.equals(e.getRequiredType(), BookingState.class))
+                ? "Unknown state: "
+                : "Unknown argument: ";
+
+        return new Violation(msg + e.getValue());
     }
 }

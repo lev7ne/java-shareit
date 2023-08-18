@@ -8,7 +8,6 @@ import ru.practicum.shareit.item.dto.ItemDtoResponse;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
-import java.util.Collection;
 import java.util.List;
 
 @RestController
@@ -23,19 +22,21 @@ public class ItemController {
 
     @PostMapping
     public ItemDtoResponse createItem(@RequestHeader("X-Sharer-User-Id") long ownerId,
-                                      @Valid @RequestBody ItemDtoRequest itemDto) {
-        return itemService.save(ownerId, itemDto);
+                                      @Valid @RequestBody ItemDtoRequest itemDtoRequest) {
+        return itemService.save(ownerId, itemDtoRequest);
     }
 
     @PatchMapping("/{id}")
     public ItemDtoResponse updateItem(@RequestHeader("X-Sharer-User-Id") long ownerId,
-                                      @RequestBody ItemDtoRequest itemDto, @PathVariable("id") long itemId) {
-        return itemService.update(ownerId, itemDto, itemId);
+                                      @RequestBody ItemDtoRequest itemDtoRequest, @PathVariable("id") long itemId) {
+        return itemService.update(ownerId, itemDtoRequest, itemId);
     }
 
     @GetMapping("/search")
-    public Collection<ItemDtoResponse> search(@RequestParam("text") String text) {
-        return itemService.search(text);
+    public List<ItemDtoResponse> searchItem(@RequestParam("text") String text,
+                                            @RequestParam(defaultValue = "0") int from,
+                                            @RequestParam(defaultValue = "10") int size) {
+        return itemService.search(text, from, size);
     }
 
     @GetMapping("/{id}")
@@ -45,13 +46,16 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDtoResponse> getAll(@RequestHeader("X-Sharer-User-Id") long ownerId) {
-        return itemService.getAll(ownerId);
+    public List<ItemDtoResponse> getAllItems(@RequestHeader("X-Sharer-User-Id") long ownerId,
+                                             @RequestParam(defaultValue = "0") int from,
+                                             @RequestParam(defaultValue = "10") int size) {
+        return itemService.getAll(ownerId, from, size);
     }
 
     @PostMapping("/{itemId}/comment")
     public CommentDto createComment(@RequestHeader("X-Sharer-User-Id") long bookerId,
-                                    @Valid @RequestBody CommentDto commentDto, @PathVariable long itemId) {
+                                    @Valid @RequestBody CommentDto commentDto,
+                                    @PathVariable long itemId) {
         return itemService.saveComment(bookerId, commentDto, itemId);
     }
 }

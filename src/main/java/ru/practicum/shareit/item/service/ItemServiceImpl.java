@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,8 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.util.exception.AccessDeniedException;
@@ -24,7 +27,10 @@ import ru.practicum.shareit.util.exception.UnavailableException;
 import ru.practicum.shareit.util.validator.ObjectHelper;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.booking.model.BookingStatus.APPROVED;
@@ -37,22 +43,33 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final ItemRequestRepository itemRequestRepository;
 
     @Autowired
-    public ItemServiceImpl(ItemRepository itemRepository, UserRepository userRepository, BookingRepository bookingRepository, CommentRepository commentRepository) {
+    public ItemServiceImpl(ItemRepository itemRepository, UserRepository userRepository, BookingRepository bookingRepository, CommentRepository commentRepository, ItemRequestRepository itemRequestRepository) {
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
         this.bookingRepository = bookingRepository;
         this.commentRepository = commentRepository;
+        this.itemRequestRepository = itemRequestRepository;
     }
 
     @Override
     @Transactional
-    public ItemDtoResponse save(long ownerId, ItemDtoRequest itemDto) {
+    public ItemDtoResponse save(long ownerId, ItemDtoRequest itemDtoRequest) {
         User owner = ObjectHelper.findUserById(userRepository, ownerId);
 
-        Item item = ItemDtoMapper.mapToItem(itemDto);
+        Item item = ItemDtoMapper.mapToItem(itemDtoRequest);
         item.setOwner(owner);
+
+        long requestId = itemDtoRequest.getRequestId();
+        if (requestId > 0) {
+            ItemRequest itemRequest = ObjectHelper.findItemRequestById(itemRequestRepository, requestId);
+            if (itemRequest.getRequester().getId() == ownerId) {
+                throw new UnavailableException("Пользователь не может создать вещь в ответ на свой запрос.");
+            }
+            item.setItemRequest(itemRequest);
+        }
 
         return ItemDtoMapper.mapToItemDtoResponse(itemRepository.save(item));
     }
@@ -60,6 +77,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public ItemDtoResponse update(long ownerId, ItemDtoRequest itemDto, long itemId) {
+        ObjectHelper.findUserById(userRepository, ownerId);
         Item updatedItem = ObjectHelper.findItemById(itemRepository, itemId);
 
         if (updatedItem.getOwner().getId() != ownerId) {
@@ -82,6 +100,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional(readOnly = true)
     public ItemDtoResponse find(long itemId, long userId) {
+        ObjectHelper.findUserById(userRepository, userId);
         Item item = ObjectHelper.findItemById(itemRepository, itemId);
         List<CommentDto> comments = findComments(itemId);
 
@@ -122,8 +141,10 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemDtoResponse> getAll(long ownerId) {
-        List<Item> itemsList = itemRepository.getItemsByOwner_Id(ownerId);
+    public List<ItemDtoResponse> getAll(long ownerId, Integer from, Integer size) {
+        ObjectHelper.findUserById(userRepository, ownerId);
+        PageRequest page = ObjectHelper.getPageRequest(from, size);
+        List<Item> itemsList = itemRepository.getItemsByOwner_Id(ownerId, page);
 
         List<Long> itemIdsList = itemsList.stream()
                 .map(Item::getId)
@@ -179,11 +200,12 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public Collection<ItemDtoResponse> search(String text) {
+    public List<ItemDtoResponse> search(String text, int from, int size) {
         if (text == null || text.isBlank()) {
             return new ArrayList<>();
         }
-        return itemRepository.search(text).stream()
+        PageRequest page = ObjectHelper.getPageRequest(from, size);
+        return itemRepository.search(text, page).stream()
                 .map(ItemDtoMapper::mapToItemDtoResponse)
                 .collect(Collectors.toList());
     }
@@ -192,6 +214,7 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     public CommentDto saveComment(long bookerId, CommentDto commentDto, long itemId) {
         User booker = ObjectHelper.findUserById(userRepository, bookerId);
+        Item item = ObjectHelper.findItemById(itemRepository, itemId);
 
         List<Booking> itemBookings = new ArrayList<>(bookingRepository.findAllByItem_IdAndBooker_IdAndBookingStatus(itemId, bookerId, APPROVED));
 
@@ -207,7 +230,6 @@ public class ItemServiceImpl implements ItemService {
             throw new UnavailableException("Отзыв можно оставить только после состоявшегося бронирования.");
         }
 
-        Item item = ObjectHelper.findItemById(itemRepository, itemId);
 
         commentDto.setCreated(LocalDateTime.now());
 
