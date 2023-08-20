@@ -29,8 +29,8 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Object> getUserById(@PathVariable Long userId) {
-        return userClient.getById(userId);
+    public ResponseEntity<Object> getUserById(@PathVariable Long id) {
+        return userClient.getById(id);
     }
 
     @DeleteMapping("/{id}")

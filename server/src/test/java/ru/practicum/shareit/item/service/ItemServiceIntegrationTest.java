@@ -23,13 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ItemServiceIntegrationTest {
-    @Autowired
-    private ItemService itemService;
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private BookingService bookingService;
-
     UserDto userDto1;
     UserDto userDto2;
     ItemDtoRequest itemDtoRequest1;
@@ -37,6 +30,12 @@ public class ItemServiceIntegrationTest {
     BookingDtoRequest bookingDtoRequestLast;
     BookingDtoRequest bookingDtoRequestNext;
     CommentDto commentDto;
+    @Autowired
+    private ItemService itemService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private BookingService bookingService;
 
     @BeforeEach
     void setUp() {

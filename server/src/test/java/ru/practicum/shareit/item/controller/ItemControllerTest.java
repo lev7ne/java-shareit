@@ -26,18 +26,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(controllers = ItemController.class)
 class ItemControllerTest {
+    ItemDtoRequest itemDtoRequest1;
+    ItemDtoRequest itemDtoRequest2;
+    ItemDtoResponse itemDtoResponse1;
+    ItemDtoResponse itemDtoResponse2;
+    CommentDto commentDto;
     @MockBean
     private ItemService mockItemService;
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
     private MockMvc mockMvc;
-
-    ItemDtoRequest itemDtoRequest1;
-    ItemDtoRequest itemDtoRequest2;
-    ItemDtoResponse itemDtoResponse1;
-    ItemDtoResponse itemDtoResponse2;
-    CommentDto commentDto;
 
     @BeforeEach
     void setUp() {

@@ -40,6 +40,12 @@ import static ru.practicum.shareit.booking.model.BookingStatus.APPROVED;
 
 @ExtendWith(MockitoExtension.class)
 class ItemServiceImplTest {
+    User testUser1;
+    ItemDtoRequest testItemDtoRequest1;
+    Item testItem1;
+    ItemDtoResponse testItemDtoResponse1;
+    ItemRequest testItemRequest1;
+    CommentDto testCommentDto1;
     @Mock
     private UserRepository mockUserRepository;
     @Mock
@@ -52,13 +58,6 @@ class ItemServiceImplTest {
     private ItemRequestRepository mockItemRequestRepository;
     @InjectMocks
     private ItemServiceImpl itemService;
-
-    User testUser1;
-    ItemDtoRequest testItemDtoRequest1;
-    Item testItem1;
-    ItemDtoResponse testItemDtoResponse1;
-    ItemRequest testItemRequest1;
-    CommentDto testCommentDto1;
 
     @BeforeEach
     void setUp() {

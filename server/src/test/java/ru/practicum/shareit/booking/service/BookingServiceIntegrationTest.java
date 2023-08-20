@@ -24,13 +24,6 @@ import static ru.practicum.shareit.booking.model.BookingState.*;
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class BookingServiceIntegrationTest {
-    @Autowired
-    private ItemService itemService;
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private BookingService bookingService;
-
     UserDto userDto1;
     UserDto userDto2;
     ItemDtoRequest itemDtoRequest1;
@@ -38,6 +31,12 @@ public class BookingServiceIntegrationTest {
     BookingDtoRequest bookingDtoRequestPast;
     BookingDtoRequest bookingDtoRequestCurrent;
     BookingDtoRequest bookingDtoRequestFuture;
+    @Autowired
+    private ItemService itemService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private BookingService bookingService;
 
     @BeforeEach
     void setUp() {

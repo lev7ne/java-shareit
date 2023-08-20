@@ -26,20 +26,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @Transactional
 class ItemRepositoryTest {
 
+    User testUser;
+    UserDto testUserDto;
+    Item testItem;
+    ItemDtoRequest testItemDtoRequest;
+    ItemRequest testItemRequest;
+    PageRequest testPage;
     @Autowired
     private ItemRepository itemRepository;
     @Autowired
     private UserRepository userRepository;
     @Autowired
     private ItemRequestRepository itemRequestRepository;
-
-    User testUser;
-    UserDto testUserDto;
-
-    Item testItem;
-    ItemDtoRequest testItemDtoRequest;
-    ItemRequest testItemRequest;
-    PageRequest testPage;
 
     @BeforeEach
     void setUp() {

@@ -30,15 +30,6 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ItemRequestServiceImplTest {
-    @Mock
-    private ItemRequestRepository mockItemRequestRepository;
-    @Mock
-    private UserRepository mockUserRepository;
-    @Mock
-    private ItemRepository mockItemRepository;
-    @InjectMocks
-    private ItemRequestServiceImpl itemRequestService;
-
     User testUser1;
     User testUser2;
     Item testItem1;
@@ -47,6 +38,14 @@ class ItemRequestServiceImplTest {
     ItemRequestDtoRequest testItemRequestDtoRequest2;
     ItemRequest testItemRequest1;
     ItemRequest testItemRequest2;
+    @Mock
+    private ItemRequestRepository mockItemRequestRepository;
+    @Mock
+    private UserRepository mockUserRepository;
+    @Mock
+    private ItemRepository mockItemRepository;
+    @InjectMocks
+    private ItemRequestServiceImpl itemRequestService;
 
     @BeforeEach
     void setUp() {

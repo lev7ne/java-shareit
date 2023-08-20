@@ -39,15 +39,6 @@ import static ru.practicum.shareit.booking.model.BookingStatus.WAITING;
 
 @ExtendWith(MockitoExtension.class)
 class BookingServiceImplTest {
-    @Mock
-    private BookingRepository mockBookingRepository;
-    @Mock
-    private UserRepository mockUserRepository;
-    @Mock
-    private ItemRepository mockItemRepository;
-    @InjectMocks
-    private BookingServiceImpl bookingService;
-
     User testUser1;
     User testUser2;
     ItemDtoRequest testItemDtoRequest1;
@@ -58,6 +49,14 @@ class BookingServiceImplTest {
     Booking testBooking2;
     BookingDtoRequest testBookingDtoRequest1;
     PageRequest page;
+    @Mock
+    private BookingRepository mockBookingRepository;
+    @Mock
+    private UserRepository mockUserRepository;
+    @Mock
+    private ItemRepository mockItemRepository;
+    @InjectMocks
+    private BookingServiceImpl bookingService;
 
     @BeforeEach
     void setUp() {
