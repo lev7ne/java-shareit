@@ -83,5 +83,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "and b.bookingStatus = ?3 ")
     List<Booking> findNextApprovedBookingByItemId(long itemId, LocalDateTime now, BookingStatus bookingStatus, Sort sort);
 
+
 }
 
