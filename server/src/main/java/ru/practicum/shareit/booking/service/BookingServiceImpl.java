@@ -172,4 +172,5 @@ public class BookingServiceImpl implements BookingService {
                 throw new UnavailableStateException("Недопустимый параметр state.");
         }
     }
+
 }
