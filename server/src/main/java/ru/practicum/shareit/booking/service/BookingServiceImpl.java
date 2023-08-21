@@ -20,7 +20,6 @@ import ru.practicum.shareit.util.exception.ObjectNotFoundException;
 import ru.practicum.shareit.util.exception.UnavailableException;
 import ru.practicum.shareit.util.exception.UnavailableStateException;
 import ru.practicum.shareit.util.validator.ObjectHelper;
-import ru.practicum.shareit.util.validator.Validator;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -55,7 +54,6 @@ public class BookingServiceImpl implements BookingService {
             throw new UnavailableException(item.getName() + " - забронирован другим пользователем.");
         }
 
-        Validator.startAndEndTimeBookingValidation(bookingDtoRequest);
         Booking booking = BookingDtoMapper.toBooking(bookingDtoRequest, item, booker);
 
         return BookingDtoMapper.toBookingDtoResponse(bookingRepository.save(booking));
@@ -172,5 +170,4 @@ public class BookingServiceImpl implements BookingService {
                 throw new UnavailableStateException("Недопустимый параметр state.");
         }
     }
-
 }

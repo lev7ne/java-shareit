@@ -17,9 +17,4 @@ public class UserDto {
     @NotBlank(message = "Email не может быть пустым!")
     @Email(message = "Некорректный email!")
     private String email;
-
-    public UserDto(String name, String email) {
-        this.name = name;
-        this.email = email;
-    }
 }

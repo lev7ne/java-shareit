@@ -129,14 +129,4 @@ class BookingControllerTest {
                 .andExpect(jsonPath("$[0].id", is(1)))
                 .andExpect(jsonPath("$[1].id", is(2)));
     }
-
-    @Test
-    void readAllOwnerBooking_whenInvalidState_thenThrowException() throws Exception {
-        mockMvc.perform(get("/bookings/owner")
-                        .header("X-Sharer-User-Id", 1)
-                        .queryParam("state", "ERROR")
-                        .queryParam("from", "0")
-                        .queryParam("size", "10"))
-                .andExpect(status().isInternalServerError());
-    }
 }

@@ -19,17 +19,4 @@ public class ItemDtoRequest {
     @NotNull
     private Boolean available;
     private long requestId;
-
-    public ItemDtoRequest(String name, String description, Boolean available, long requestId) {
-        this.name = name;
-        this.description = description;
-        this.available = available;
-        this.requestId = requestId;
-    }
-
-    public ItemDtoRequest(String name, String description, Boolean available) {
-        this.name = name;
-        this.description = description;
-        this.available = available;
-    }
 }

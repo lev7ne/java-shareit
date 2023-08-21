@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.client.BookingClient;
 import ru.practicum.shareit.booking.dto.BookingDtoRequest;
 import ru.practicum.shareit.booking.dto.BookingState;
+import ru.practicum.shareit.util.validator.Validator;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -24,6 +25,7 @@ public class BookingController {
     @PostMapping
     public ResponseEntity<Object> bookItem(@RequestHeader("X-Sharer-User-Id") long bookerId,
                                            @RequestBody @Valid BookingDtoRequest bookingDtoRequest) {
+        Validator.startAndEndTimeBookingValidation(bookingDtoRequest);
         return bookingClient.bookItem(bookerId, bookingDtoRequest);
     }
 
